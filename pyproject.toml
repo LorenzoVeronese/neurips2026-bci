@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neurips-bci"
+version = "1.0.0"
+description = "Object-oriented reproduction codebase for the H10 causal electroencephalography brain-computer interface decoder."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.0",
+    "scipy>=1.13",
+    "scikit-learn>=1.5",
+    "pandas>=2.2",
+    "torch>=2.5",
+    "mne>=1.8",
+    "mne-bids>=0.15",
+    "moabb>=1.1",
+    "pyriemann>=0.7",
+    "braindecode>=1.2",
+    "benchopt>=1.10",
+    "neuralset==0.4.0",
+    "neuralfetch==0.4.0",
+    "neuraltrain==0.4.0",
+    "neuralbench==0.4.0",
+    "exca==0.5.29",
+    "nemar-py>=0.3.1",
+    "huggingface_hub>=0.25",
+    "safetensors>=0.4",
+    "einops>=0.8",
+    "pybv>=0.7",
+    "edfio>=0.4",
+    "h5py>=3.11",
+    "pyarrow>=17.0",
+    "PyYAML>=6.0",
+    "joblib>=1.4",
+    "tqdm>=4.66",
+    "requests>=2.32",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "matplotlib>=3.9",
+]
+
+[project.scripts]
+neurips-bci = "neurips_bci.workflow.cli_workflows.CommandLineInterfaceWorkflow:run_cli_entrypoint"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["neurips_bci*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

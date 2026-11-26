@@ -1,0 +1,1756 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeurIPS 2026 BCI (`neurips_bci`) — Interactive Causal EEG BCI Architecture &amp; Benchmark Explorer</title>
+<style>
+:root {
+  --bg-page: #0b1120;
+  --bg-card: #111a2e;
+  --bg-elevated: #17233d;
+  --bg-code: #080d19;
+  --text-main: #e6edf7;
+  --text-muted: #98a8c3;
+  --border-subtle: #243456;
+  --accent-primary: #38bdf8;
+  --accent-secondary: #34d399;
+  --accent-amber: #fbbf24;
+  --accent-rose: #fb7185;
+  --accent-violet: #a78bfa;
+  --shadow-card: 0 10px 28px rgba(0, 0, 0, 0.35);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+[data-theme="light"] {
+  --bg-page: #f5f8fc;
+  --bg-card: #ffffff;
+  --bg-elevated: #eef3fa;
+  --bg-code: #f1f5f9;
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --border-subtle: #cbd5e1;
+  --accent-primary: #0284c7;
+  --accent-secondary: #059669;
+  --accent-amber: #d97706;
+  --accent-rose: #e11d48;
+  --accent-violet: #7c3aed;
+  --shadow-card: 0 8px 24px rgba(15, 23, 42, 0.07);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0.65rem 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 700;
+  font-size: 1.02rem;
+  letter-spacing: 0.01em;
+}
+
+.brand-badge {
+  background: var(--accent-primary);
+  color: #061224;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 5px;
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-links a, .theme-btn {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nav-links a:hover, .theme-btn:hover {
+  color: var(--text-main);
+  background: var(--bg-elevated);
+  border-color: var(--border-subtle);
+}
+
+.theme-btn {
+  border-color: var(--border-subtle);
+  color: var(--text-main);
+}
+
+.container {
+  max-width: 1260px;
+  margin: 0 auto;
+  padding: 1.75rem 1.25rem 4rem;
+}
+
+.hero {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 2rem;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 1.75rem;
+}
+
+.hero h1 {
+  margin: 0 0 0.75rem;
+  font-size: 1.85rem;
+  line-height: 1.25;
+}
+
+.hero p {
+  margin: 0 0 0.9rem;
+  color: var(--text-muted);
+  max-width: 980px;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.9rem;
+  margin-top: 1.25rem;
+}
+
+.kpi-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 0.95rem 1.1rem;
+}
+
+.kpi-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.kpi-num {
+  font-family: var(--font-mono);
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--accent-primary);
+  margin: 0.2rem 0;
+}
+
+.kpi-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.section-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 1.65rem;
+  margin-bottom: 1.75rem;
+  box-shadow: var(--shadow-card);
+}
+
+.section-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.85rem;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 1.32rem;
+}
+
+.section-desc {
+  color: var(--text-muted);
+  margin: 0.4rem 0 0;
+  max-width: 880px;
+  font-size: 0.93rem;
+}
+
+.btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.pill-btn {
+  background: var(--bg-elevated);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: 7px;
+  padding: 0.38rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.pill-btn:hover {
+  border-color: var(--accent-primary);
+}
+
+.pill-btn.active {
+  background: var(--accent-primary);
+  color: #061224;
+  border-color: var(--accent-primary);
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 1.35rem;
+  align-items: start;
+}
+
+@media (max-width: 940px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+
+.panel-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 11px;
+  padding: 1.15rem;
+}
+
+.panel-box h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
+
+.mono-tag {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  background: var(--bg-code);
+  border: 1px solid var(--border-subtle);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  color: var(--accent-secondary);
+}
+
+.eq-box {
+  font-family: var(--font-mono);
+  font-size: 0.83rem;
+  background: var(--bg-code);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 0.75rem 0.9rem;
+  margin: 0.65rem 0;
+  overflow-x: auto;
+  color: var(--accent-amber);
+}
+
+.meta-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+  margin-top: 0.6rem;
+}
+
+.meta-table th, .meta-table td {
+  text-align: left;
+  padding: 0.45rem 0.55rem;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: top;
+}
+
+.meta-table th {
+  color: var(--text-muted);
+  width: 34%;
+  font-weight: 600;
+}
+
+.svg-wrap {
+  width: 100%;
+  background: var(--bg-code);
+  border: 1px solid var(--border-subtle);
+  border-radius: 11px;
+  padding: 0.75rem;
+  overflow-x: auto;
+}
+
+svg text {
+  font-family: var(--font-sans);
+  user-select: none;
+}
+
+.electrode-node {
+  cursor: pointer;
+  transition: transform 0.14s ease, stroke-width 0.14s ease;
+}
+
+.electrode-node:hover circle {
+  stroke-width: 3px;
+}
+
+.stage-node {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.stage-node rect {
+  transition: stroke-width 0.15s ease, filter 0.15s ease;
+}
+
+.stage-node:hover rect {
+  stroke-width: 2.6px;
+}
+
+.slider-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.slider-ctrl {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 9px;
+  padding: 0.85rem 1rem;
+}
+
+.slider-ctrl label {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 0.86rem;
+  margin-bottom: 0.35rem;
+}
+
+.slider-ctrl input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent-primary);
+}
+
+.layer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+  gap: 0.65rem;
+}
+
+.layer-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 9px;
+  padding: 0.75rem 0.85rem;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-main);
+  transition: all 0.15s ease;
+}
+
+.layer-card:hover, .layer-card.active {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 1px var(--accent-primary) inset;
+}
+
+.layer-rank {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent-primary);
+  font-weight: 700;
+}
+
+.layer-title {
+  font-weight: 700;
+  font-size: 0.94rem;
+  margin: 0.15rem 0;
+}
+
+.cmd-list {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+}
+
+.cmd-item {
+  background: var(--bg-code);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.cmd-code {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--accent-secondary);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.copy-btn {
+  background: var(--bg-elevated);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 0.28rem 0.6rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.copy-btn:hover { border-color: var(--accent-primary); }
+
+.glossary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 0.75rem;
+}
+
+.glossary-item {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.85rem;
+}
+
+.glossary-item strong {
+  color: var(--accent-primary);
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0.35rem 0;
+  font-size: 0.82rem;
+}
+
+.bar-track {
+  flex: 1;
+  height: 10px;
+  background: var(--bg-code);
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.25s ease;
+}
+
+footer {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.83rem;
+  margin-top: 2rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border-subtle);
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-badge">PROTEUS H10</span>
+    <span>Causal Streaming EEG BCI Decoder Explorer</span>
+  </div>
+  <nav class="nav-links">
+    <a href="#topography">1. 41-Ch Scalp Map</a>
+    <a href="#signalflow">2. H10 Signal Flow</a>
+    <a href="#paceguard">3. Pace-Guard Simulator</a>
+    <a href="#benchmarks">4. Evolution &amp; 16-Fold CV</a>
+    <a href="#architecture">5. 11-Layer OOP &amp; CLI</a>
+    <a href="#glossary">Glossary</a>
+    <button class="theme-btn" id="themeToggle" type="button">Light / Dark</button>
+  </nav>
+</header>
+
+<main class="container">
+
+  <!-- HERO & PLAIN-LANGUAGE INTRODUCTION -->
+  <section class="hero">
+    <h1>NeurIPS 2026 BCI (`neurips_bci`): Causal Multimodal Electroencephalography Decoding</h1>
+    <p>
+      <strong>Electroencephalography (EEG)</strong> records electrical brain potentials from electrodes resting on the scalp, measured in <strong>microvolts (uV, millionths of a volt)</strong>. A <strong>brain-computer interface (BCI)</strong> translates those scalp signals directly into computer commands without muscle movement. In Track 2 of the 2026 NeurIPS EEG Challenge (<code>NEMAR nm000290</code> v1.0.0, <code>CC-BY-4.0</code>), the decoder receives one 4-second EEG window at a time (<code>B = 1</code>, 41 electrodes sampled at 120 <strong>hertz, Hz, samples per second</strong>, giving <code>41 x 480</code> values) and classifies three mental commands: <strong>motor imagery (MI, mentally rehearsing a hand movement without moving muscles)</strong>, <strong>mental subtraction (SUB, silently subtracting numbers in working memory)</strong>, and <strong>word generation (WG, silently thinking of words starting with a prompted letter)</strong>.
+    </p>
+    <p>
+      Windows arrive in a strict <strong>causal online</strong> stream inside each recording <strong>session</strong> (one participant visit of roughly 190 to 218 windows across <code>Graz</code> bar feedback and <code>BrainHero</code> game feedback interfaces): predictions at window <code>t</code> may adapt from windows <code>0..t</code> of the active session, and <code>reset_state()</code> erases all session state before the next session begins. Accuracy is scored by <strong>cell-mean balanced accuracy</strong>, the mean per-class recall inside each <code>(session, interface)</code> cell averaged equally across cells.
+    </p>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Submission 6 (r35) Banked Sealed</div>
+        <div class="kpi-num">0.823</div>
+        <div class="kpi-sub">Completed in 3,175.05 s on competition GPU worker (4,800 s cap)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Submission 7 (r45) Projected Sealed</div>
+        <div class="kpi-num">~0.830</div>
+        <div class="kpi-sub">0 Tier-0 decision flips vs r35, -27% latency (131.0 ms &rarr; 97.2 ms/w)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">16-Fold True-Live CV (O0 k05)</div>
+        <div class="kpi-num">82.66%</div>
+        <div class="kpi-sub">Recorded order: 79.31% LOSO (unseen people) / 86.01% XS4 (later days)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">16-Fold Shuffled CV (OW5 k05)</div>
+        <div class="kpi-num">81.35%</div>
+        <div class="kpi-sub">5 random window shuffles per session via PseudoChrono alignment</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 1. INTERACTIVE 41-ELECTRODE 10-10 SCALP TOPOGRAPHY -->
+  <section class="section-card" id="topography">
+    <div class="section-header">
+      <div>
+        <h2>1. Interactive 41-Electrode 10-10 Scalp Topography &amp; Physiological Rhythms</h2>
+        <p class="section-desc">
+          Imagining a left-hand movement triggers contralateral <strong>event-related desynchronization (ERD)</strong>: a pronounced drop in 8 to 30 Hz <strong>sensorimotor rhythm (SMR, resting motor-cortex oscillation)</strong> power over right-hemisphere sensorimotor electrodes (<code>C4</code>, <code>CP4</code>, <code>FC4</code>, <code>C2</code>). Click any electrode or switch mental commands and functional channel groups below.
+        </p>
+      </div>
+      <div class="btn-group" id="topoTaskBtns">
+        <button class="pill-btn active" data-task="MI" type="button">Motor Imagery (Left-Hand ERD)</button>
+        <button class="pill-btn" data-task="SUB" type="button">Mental Subtraction (SUB)</button>
+        <button class="pill-btn" data-task="WG" type="button">Word Generation (WG)</button>
+      </div>
+    </div>
+
+    <div class="btn-group" style="margin-bottom:1rem;" id="topoGroupBtns">
+      <button class="pill-btn active" data-group="ALL" type="button">All 41 PROTEUS Electrodes (+ 10-10 Landmarks)</button>
+      <button class="pill-btn" data-group="SMR" type="button">Sensorimotor Strip (FC* / C* / CP*)</button>
+      <button class="pill-btn" data-group="FP" type="button">Fronto-Parietal Executive (AF* / F* / P*)</button>
+      <button class="pill-btn" data-group="PO" type="button">Parieto-Occipital &amp; Temporal (PO* / TP*)</button>
+    </div>
+
+    <div class="two-col">
+      <div class="svg-wrap" style="text-align:center;">
+        <svg id="scalpSvg" viewBox="0 0 560 540" width="100%" style="max-width:540px;height:auto;" aria-label="41-channel 10-10 EEG scalp montage"></svg>
+      </div>
+      <div class="panel-box" id="electrodeDetail">
+        <h3 id="elTitle">Electrode C4 — Right Primary Sensorimotor Cortex</h3>
+        <p id="elSummary" style="color:var(--text-muted);font-size:0.9rem;margin:0.35rem 0 0.75rem;"></p>
+        <table class="meta-table">
+          <tr><th>Montage Status</th><td id="elStatus">Active PROTEUS Channel (1 of 41)</td></tr>
+          <tr><th>Functional Group</th><td id="elGroup">Sensorimotor Strip (SMR)</td></tr>
+          <tr><th>10-10 Hemisphere</th><td id="elHemi">Right Hemisphere (Contralateral to Left Hand)</td></tr>
+          <tr><th>H10 Spatial Usage</th><td id="elH10Role">41x41 Band Covariance, ShallowConvNet/FBCNet spatial filters, Session CSP, ANCHOR-MM C4-direct residual</td></tr>
+        </table>
+        <div style="margin-top:0.95rem;">
+          <div style="font-weight:700;font-size:0.86rem;margin-bottom:0.35rem;">Relative Band-Power Modulation (Selected Task vs Baseline)</div>
+          <div id="elBands"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. INTERACTIVE H10 12-STAGE SIGNAL-FLOW EXPLORER -->
+  <section class="section-card" id="signalflow">
+    <div class="section-header">
+      <div>
+        <h2>2. Interactive H10 12-Stage Causal Signal-Flow Explorer</h2>
+        <p class="section-desc">
+          Follow a single streamed EEG window <code>(1, 41, 480)</code> component by component from clock check to predicted class. Click any stage block to inspect its plain-language role, exact equation, tensor shapes, <code>neurips_bci</code> class path, and load-shedding behavior, or preview Tiers 0&ndash;3 live.
+        </p>
+      </div>
+      <div class="btn-group" id="flowTierBtns">
+        <button class="pill-btn active" data-tier="0" type="button">Tier 0 (Full H10 Stack)</button>
+        <button class="pill-btn" data-tier="1" type="button">Tier 1 (r45 Light Shed)</button>
+        <button class="pill-btn" data-tier="2" type="button">Tier 2 (Fast Core)</button>
+        <button class="pill-btn" data-tier="3" type="button">Tier 3 (CNN40 Emergency)</button>
+      </div>
+    </div>
+
+    <div class="svg-wrap" style="margin-bottom:1.2rem;">
+      <svg id="flowSvg" viewBox="0 0 1140 410" width="100%" style="min-width:860px;height:auto;" aria-label="H10 12-stage signal flow schematic"></svg>
+    </div>
+
+    <div class="panel-box" id="stageInspector">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:0.5rem;">
+        <h3 id="stTitle" style="margin:0;">[G] PaceGuard — Session Credit &amp; Global Clock Ladder</h3>
+        <span class="mono-tag" id="stClassPath">neurips_bci.adaptation.gate_adapters.SessionPaceGateAdapter</span>
+      </div>
+      <p id="stRole" style="margin:0.55rem 0;color:var(--text-muted);"></p>
+      <div class="eq-box" id="stEquation"></div>
+      <table class="meta-table">
+        <tr><th>Input &rarr; Output Shapes</th><td id="stShapes"></td></tr>
+        <tr><th>Signal Symbol</th><td id="stSymbol"></td></tr>
+        <tr><th>Load-Shedding Tier Rule</th><td id="stTierRule"></td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- 3. INTERACTIVE PACE-GUARD TIER SIMULATOR -->
+  <section class="section-card" id="paceguard">
+    <div class="section-header">
+      <div>
+        <h2>3. Interactive Pace-Guard Tier Simulator: Submission 6 (r35) vs Submission 7 (r45)</h2>
+        <p class="section-desc">
+          The competition evaluation server terminates any run exceeding <code>4,800 s</code> (80 minutes). Submission 7 (<code>r45</code>) moves the <strong>ANCHOR-MM</strong> covariance residual organ onto the <strong>graphics processing unit (GPU)</strong> in <code>float64</code> precision (cutting per-window latency by 27%, from <code>131.0 ms</code> to <code>97.2 ms</code> with zero Tier-0 decision changes), raises the session pace budget from <code>0.205 s</code> to <code>0.290 s</code> per window, and preserves mid-session <strong>self-training (ST, refitting weights at windows 66 and 126 on high-confidence teacher pseudo-labels)</strong> in Tier 1.
+        </p>
+      </div>
+      <div class="btn-group" id="simStreamBtns">
+        <button class="pill-btn active" data-windows="14166" type="button">Standard Sealed Stream (65 Sessions / 14,166 Windows)</button>
+        <button class="pill-btn" data-windows="18000" type="button">Extended Stress Stream (77 Sessions / 18,000 Windows)</button>
+      </div>
+    </div>
+
+    <div class="slider-row">
+      <div class="slider-ctrl">
+        <label for="speedSlider">
+          <span>Worker Slowdown Factor (vs Local RTX PRO 6000 Node)</span>
+          <span class="mono-tag" id="speedVal">2.00x</span>
+        </label>
+        <input type="range" id="speedSlider" min="1.00" max="4.50" step="0.05" value="2.00">
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">
+          <code>1.95x&ndash;2.65x</code> matches observed Codabench worker range; <code>4.00x+</code> tests severe contention.
+        </div>
+      </div>
+      <div class="slider-ctrl">
+        <label for="sessSlider">
+          <span>Inspect Session Index</span>
+          <span class="mono-tag" id="sessVal">Session 58 / 65</span>
+        </label>
+        <input type="range" id="sessSlider" min="1" max="65" step="1" value="58">
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">
+          Inspect per-window time credit <code>c_t</code> across windows <code>1..218</code> (checkpoints at <code>t = 66, 126</code>).
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-grid" style="margin-bottom:1.15rem;" id="simSummaryCards"></div>
+
+    <div class="two-col">
+      <div class="svg-wrap">
+        <div style="font-weight:700;font-size:0.86rem;margin-bottom:0.35rem;padding:0 0.3rem;">
+          Per-Window Session Time Credit <code>c_t</code> (Selected Session, Thresholds 1.2s / 0.6s / 0.2s)
+        </div>
+        <svg id="creditSvg" viewBox="0 0 560 270" width="100%" style="height:auto;"></svg>
+      </div>
+      <div class="svg-wrap">
+        <div style="font-weight:700;font-size:0.86rem;margin-bottom:0.35rem;padding:0 0.3rem;">
+          Session Tier Distribution &amp; Total Runtime vs 4,800 s Worker Limit
+        </div>
+        <svg id="tierDistSvg" viewBox="0 0 520 270" width="100%" style="height:auto;"></svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. INTERACTIVE BENCHMARK EVOLUTION & 16-FOLD CV EXPLORER -->
+  <section class="section-card" id="benchmarks">
+    <div class="section-header">
+      <div>
+        <h2>4. Model Evolution &amp; 16-Fold True-Live Cross-Validation Explorer</h2>
+        <p class="section-desc">
+          Offline validation spans 10 <strong>leave-one-subject-out (LOSO, unseen participant)</strong> folds (<code>P01..P10</code>), 4 <strong>cross-session (XS4, later recording day of a known participant)</strong> folds (<code>P04/S2, P04/S3, P10/S2, P10/S3</code>), and 2 single-prior-session folds (<code>XS1: P04/S3*, P10/S3*</code>). Toggle between chronological order <strong>O0 (82.66% k05)</strong> and 5-shuffle order <strong>OW5 (81.35% k05)</strong>, or click any bar for participant diagnostics.
+        </p>
+      </div>
+      <div class="btn-group" id="cvOrderBtns">
+        <button class="pill-btn active" data-order="O0" type="button">Chronological O0 (82.66% k05)</button>
+        <button class="pill-btn" data-order="OW5" type="button">5-Shuffle OW5 (81.35% k05)</button>
+        <button class="pill-btn" data-order="BOTH" type="button">Side-by-Side O0 vs OW5</button>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-bottom:1.25rem;">
+      <div class="svg-wrap">
+        <div style="font-weight:700;font-size:0.86rem;margin-bottom:0.3rem;padding:0 0.3rem;">
+          Decoder Progression (j_k25 &rarr; H10 Submission 7 r45)
+        </div>
+        <svg id="evolSvg" viewBox="0 0 580 285" width="100%" style="height:auto;"></svg>
+      </div>
+      <div class="panel-box" id="evolInspector">
+        <h3 id="evTitle">H10-r45 (Submission 7 Certified Package)</h3>
+        <p id="evDesc" style="color:var(--text-muted);font-size:0.9rem;margin:0.4rem 0 0.75rem;"></p>
+        <table class="meta-table">
+          <tr><th>Offline O0 k05</th><td id="evO0">82.66%</td></tr>
+          <tr><th>Offline OW5 k05</th><td id="evOW5">81.35%</td></tr>
+          <tr><th>Sealed Test Score</th><td id="evSealed">~0.830 projected (0.823 floor banked)</td></tr>
+          <tr><th>Key Architectural Addition</th><td id="evKey">GPU float64 ANCHOR-MM (-27% latency) + 0.29 s/w PaceGuard keeping Tier-1 self-training</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="svg-wrap">
+      <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:0 0.35rem 0.35rem;">
+        <span style="font-weight:700;font-size:0.88rem;">16-Fold Per-Participant &amp; Cross-Session Cell-Mean Balanced Accuracy (%)</span>
+        <span class="mono-tag" id="cvBannerStat">O0: k05 = 82.66% | LOSO = 79.32% | XS4 = 86.02% | XS1 = 83.68%</span>
+      </div>
+      <svg id="foldSvg" viewBox="0 0 1120 300" width="100%" style="min-width:780px;height:auto;"></svg>
+    </div>
+    <div id="foldDetailStrip" style="margin-top:0.75rem;font-size:0.87rem;color:var(--text-muted);padding:0.55rem 0.85rem;background:var(--bg-elevated);border-radius:8px;border:1px solid var(--border-subtle);">
+      Click any fold bar above to inspect participant regime, session count, O0 vs OW5 delta, and why P04 and P10 carry clustered jackknife weight.
+    </div>
+  </section>
+
+  <!-- 5. INTERACTIVE 11-LAYER OOP ARCHITECTURE & CLI QUICKSTART -->
+  <section class="section-card" id="architecture">
+    <div class="section-header">
+      <div>
+        <h2>5. Strict 11-Layer One-Way OOP Architecture &amp; CLI Reproduction</h2>
+        <p class="section-desc">
+          <code>neurips_bci</code> enforces one class per file, plural sub-family folders, explicit domain identifiers, <code>ExperimentRunConfiguration</code> as the sole JSON I/O boundary, and strictly downward imports from <code>L10 Workflow</code> down to <code>L0 Validator</code>. Click any layer card to inspect its classes.
+        </p>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="layer-grid" id="layerGrid"></div>
+      <div class="panel-box">
+        <div class="layer-rank" id="lyRank">LAYER 9 &bull; IMPORTS L0..L9 ONLY</div>
+        <h3 id="lyName" style="margin:0.2rem 0 0.45rem;">evaluator/ (Abstract Root: Evaluator)</h3>
+        <p id="lyDesc" style="color:var(--text-muted);font-size:0.9rem;margin:0 0 0.75rem;"></p>
+        <table class="meta-table">
+          <tr><th>Sub-Families</th><td id="lySubfams"></td></tr>
+          <tr><th>Concrete Classes</th><td id="lyClasses"></td></tr>
+          <tr><th>Verified Invariant</th><td id="lyRule"></td></tr>
+        </table>
+
+        <h3 style="margin:1.25rem 0 0.45rem;">One-Click Reproducible CLI Commands</h3>
+        <div class="cmd-list" id="cmdList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLAIN-LANGUAGE NEUROSCIENCE & ML GLOSSARY -->
+  <section class="section-card" id="glossary">
+    <div class="section-header">
+      <div>
+        <h2>Plain-Language Neuroscience, Signal-Processing &amp; Machine-Learning Glossary</h2>
+        <p class="section-desc">Every technical term and abbreviation used across the NeurIPS BCI codebase and reports.</p>
+      </div>
+    </div>
+    <div class="glossary-grid">
+      <div class="glossary-item"><strong>Electroencephalography (EEG):</strong> Non-invasive recording of microvolt-scale electrical brain activity from scalp electrodes (41 channels at 120 Hz here).</div>
+      <div class="glossary-item"><strong>Sensorimotor Rhythm (SMR) &amp; ERD:</strong> 8&ndash;30 Hz mu/beta oscillations over motor cortex that drop in amplitude (<em>event-related desynchronization</em>) on the hemisphere opposite an imagined limb movement.</div>
+      <div class="glossary-item"><strong>Spatial Covariance &amp; Euclidean Alignment (EA):</strong> The 41&times;41 electrode co-variation matrix <code>C_t</code>; multiplying each window by <code>R_t^(-1/2)</code> whitens session-specific skull and impedance scaling.</div>
+      <div class="glossary-item"><strong>Pseudo-Chronological Kernel (PseudoChrono):</strong> Causal Gaussian similarity weights <code>K_{t,s}</code> (<code>s &lt; t</code>) in a 6-D non-motor drift subspace so adaptation works even when session windows are randomly shuffled (<code>OW5</code>).</div>
+      <div class="glossary-item"><strong>Riemannian Tangent Space:</strong> Projecting curved symmetric positive-definite covariance matrices onto a flat tangent plane so regularized linear and MLP classifiers can score covariance geometry.</div>
+      <div class="glossary-item"><strong>Common Spatial Patterns (CSP) &amp; LDA:</strong> Supervised spatial filters maximizing class variance contrast paired with linear discriminant analysis, refitted online at windows 66 and 126.</div>
+      <div class="glossary-item"><strong>Batch Normalization (BN) &amp; Tent:</strong> Rescaling CNN activations with causal session moments (<code>BN</code>) and nudging BN scale/shift weights to minimize prediction entropy (<code>Tent</code>) up to window 130.</div>
+      <div class="glossary-item"><strong>Foundation Model, LoRA &amp; SVD:</strong> Pretrained external EEG encoders (<code>EEGPT</code>, <code>CodeBrain</code>, <code>CBraMod</code>, <code>MIRepNet</code>) adapted with rank-8 low-rank matrix factors (<code>LoRA</code>) or compressed via singular value decomposition (<code>SVD</code>).</div>
+      <div class="glossary-item"><strong>Sinkhorn-Knopp Cell Balancing:</strong> Iterative causal row/column scaling (4 steps) keeping per-window probabilities normalized while equalizing cumulative class totals inside each session cell.</div>
+    </div>
+  </section>
+
+  <footer>
+    NeurIPS BCI Clean-Room Reproduction Suite &bull; Offline-Ready Self-Contained HTML5 + SVG + Vanilla JS Visualization &bull; Public Corpora: NEMAR nm000290, Zenodo 8089820, DepositOnce 5830.2, PhysioNet eegmat
+  </footer>
+
+</main>
+
+<script>
+(function() {
+  "use strict";
+
+  // Theme Toggle
+  const rootEl = document.documentElement;
+  const savedTheme = localStorage.getItem("neurips_bci_theme");
+  if (savedTheme === "light" || savedTheme === "dark") {
+    rootEl.setAttribute("data-theme", savedTheme);
+  }
+  document.getElementById("themeToggle").addEventListener("click", function() {
+    const nextTheme = rootEl.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    rootEl.setAttribute("data-theme", nextTheme);
+    localStorage.setItem("neurips_bci_theme", nextTheme);
+    renderScalp();
+    renderFlow();
+    renderSimulator();
+    renderEvolution();
+    renderFolds();
+  });
+
+  function cssVar(varName) {
+    return getComputedStyle(rootEl).getPropertyValue(varName).trim();
+  }
+
+  // =========================================================================
+  // 1. 41-ELECTRODE 10-10 SCALP TOPOGRAPHY DATA & INTERACTION
+  // =========================================================================
+  // Exact 41 PROTEUS BIDS channels + reference landmarks (Fp1, Fp2, Oz) shown as dashed 10-10 landmarks
+  const ELECTRODES = [
+    // Landmarks (not in 41-ch subset, clickable educational 10-10 references)
+    { id: "Fp1", x: -0.31, y: -0.90, grp: "REF", active41: false, region: "Left Frontopolar Landmark (approximated by AF3 in 41-ch montage)" },
+    { id: "Fp2", x:  0.31, y: -0.90, grp: "REF", active41: false, region: "Right Frontopolar Landmark (approximated by AF4 in 41-ch montage)" },
+    // Active 41 PROTEUS Electrodes
+    { id: "AF3", x: -0.30, y: -0.72, grp: "FP",  active41: true, region: "Left Anterior Frontal Cortex (vertical eye-blink proxy & prefrontal control)" },
+    { id: "AF4", x:  0.30, y: -0.72, grp: "FP",  active41: true, region: "Right Anterior Frontal Cortex (vertical eye-blink proxy & prefrontal control)" },
+    { id: "F5",  x: -0.64, y: -0.52, grp: "FP",  active41: true, region: "Left Inferior/Lateral Frontal Cortex (Broca lexical-phonological proximity in WG)" },
+    { id: "F3",  x: -0.43, y: -0.50, grp: "FP",  active41: true, region: "Left Dorsolateral Prefrontal Cortex (working memory in SUB & WG)" },
+    { id: "F1",  x: -0.21, y: -0.48, grp: "FP",  active41: true, region: "Left Superior Frontal Cortex" },
+    { id: "Fz",  x:  0.00, y: -0.47, grp: "FP",  active41: true, region: "Midline Frontal Theta Hub (4-8 Hz mental arithmetic load in SUB)" },
+    { id: "F2",  x:  0.21, y: -0.48, grp: "FP",  active41: true, region: "Right Superior Frontal Cortex" },
+    { id: "F4",  x:  0.43, y: -0.50, grp: "FP",  active41: true, region: "Right Dorsolateral Prefrontal Cortex (executive arithmetic control)" },
+    { id: "F6",  x:  0.64, y: -0.52, grp: "FP",  active41: true, region: "Right Lateral Frontal Cortex" },
+    { id: "FC5", x: -0.72, y: -0.26, grp: "SMR", active41: true, region: "Left Ventral Premotor Cortex (speech motor planning in WG)" },
+    { id: "FC3", x: -0.48, y: -0.25, grp: "SMR", active41: true, region: "Left Dorsal Premotor Cortex" },
+    { id: "FC1", x: -0.24, y: -0.24, grp: "SMR", active41: true, region: "Left Supplementary Motor Area" },
+    { id: "FCz", x:  0.00, y: -0.24, grp: "SMR", active41: true, region: "Midline Supplementary Motor & Anterior Cingulate Cortex" },
+    { id: "FC2", x:  0.24, y: -0.24, grp: "SMR", active41: true, region: "Right Supplementary Motor Area" },
+    { id: "FC4", x:  0.48, y: -0.25, grp: "SMR", active41: true, region: "Right Dorsal Premotor Cortex (strong premotor mu/beta ERD in left-hand MI)" },
+    { id: "FC6", x:  0.72, y: -0.26, grp: "SMR", active41: true, region: "Right Ventral Premotor Cortex" },
+    { id: "C5",  x: -0.76, y:  0.00, grp: "SMR", active41: true, region: "Left Lateral Sensorimotor Strip" },
+    { id: "C3",  x: -0.52, y:  0.00, grp: "SMR", active41: true, region: "Left Primary Motor Hand Knob (ipsilateral reference to C4 during left-hand MI)" },
+    { id: "C1",  x: -0.26, y:  0.00, grp: "SMR", active41: true, region: "Left Medial Primary Motor Cortex" },
+    { id: "Cz",  x:  0.00, y:  0.00, grp: "SMR", active41: true, region: "Vertex Central Midline Electrode" },
+    { id: "C2",  x:  0.26, y:  0.00, grp: "SMR", active41: true, region: "Right Medial Primary Motor Cortex (contralateral SMR ERD partner)" },
+    { id: "C4",  x:  0.52, y:  0.00, grp: "SMR", active41: true, region: "Right Primary Motor Hand Knob (peak contralateral 8-30 Hz ERD during left-hand MI)" },
+    { id: "C6",  x:  0.76, y:  0.00, grp: "SMR", active41: true, region: "Right Lateral Sensorimotor Strip" },
+    { id: "TP7", x: -0.84, y:  0.28, grp: "PO",  active41: true, region: "Left Temporo-Parietal Junction (auditory-verbal lexical retrieval in WG)" },
+    { id: "CP5", x: -0.68, y:  0.26, grp: "SMR", active41: true, region: "Left Supramarginal Somatosensory Association Cortex" },
+    { id: "CP3", x: -0.46, y:  0.25, grp: "SMR", active41: true, region: "Left Primary Somatosensory Hand Cortex" },
+    { id: "CP1", x: -0.23, y:  0.24, grp: "SMR", active41: true, region: "Left Superior Somatosensory Cortex" },
+    { id: "CPz", x:  0.00, y:  0.24, grp: "SMR", active41: true, region: "Midline Centroparietal Somatosensory Cortex" },
+    { id: "CP2", x:  0.23, y:  0.24, grp: "SMR", active41: true, region: "Right Superior Somatosensory Cortex" },
+    { id: "CP4", x:  0.46, y:  0.25, grp: "SMR", active41: true, region: "Right Primary Somatosensory Hand Cortex (strong contralateral ERD with C4)" },
+    { id: "CP6", x:  0.68, y:  0.26, grp: "SMR", active41: true, region: "Right Somatosensory Association Cortex" },
+    { id: "TP8", x:  0.84, y:  0.28, grp: "PO",  active41: true, region: "Right Temporo-Parietal Cortex" },
+    { id: "P5",  x: -0.62, y:  0.52, grp: "FP",  active41: true, region: "Left Inferior Parietal / Angular Gyrus (numerical & semantic processing)" },
+    { id: "P3",  x: -0.42, y:  0.50, grp: "FP",  active41: true, region: "Left Intraparietal Sulcus (core mental calculation hub in SUB)" },
+    { id: "P1",  x: -0.21, y:  0.49, grp: "FP",  active41: true, region: "Left Precuneus / Superior Parietal Lobule" },
+    { id: "Pz",  x:  0.00, y:  0.48, grp: "FP",  active41: true, region: "Midline Parietal Alpha/Beta Integration Hub" },
+    { id: "P2",  x:  0.21, y:  0.49, grp: "FP",  active41: true, region: "Right Superior Parietal Lobule" },
+    { id: "P4",  x:  0.42, y:  0.50, grp: "FP",  active41: true, region: "Right Intraparietal Sulcus (visuospatial arithmetic network in SUB)" },
+    { id: "P6",  x:  0.62, y:  0.52, grp: "FP",  active41: true, region: "Right Inferior Parietal Cortex" },
+    { id: "PO7", x: -0.46, y:  0.76, grp: "PO",  active41: true, region: "Left Parieto-Occipital Visual-Attention Rhythm (8-13 Hz posterior alpha)" },
+    { id: "PO8", x:  0.46, y:  0.76, grp: "PO",  active41: true, region: "Right Parieto-Occipital Visual-Attention Rhythm (Graz vs BrainHero visual load)" },
+    { id: "Oz",  x:  0.00, y:  0.90, grp: "REF", active41: false, region: "Midline Occipital Landmark (approximated by PO7/PO8 in 41-ch montage)" }
+  ];
+
+  let selectedTask = "MI";
+  let selectedGroup = "ALL";
+  let selectedElectrode = "C4";
+
+  function computeBandModulation(el, task) {
+    // Physiologically grounded illustrative dB power change in [Theta 4-8, Mu 8-13, Beta 13-30, Gamma 30-45]
+    const rx = el.x, ry = el.y;
+    if (task === "MI") {
+      // Strong contralateral (right hemisphere: C4, CP4, FC4, C2) mu & beta drop (ERD)
+      const rightMotorDist = Math.hypot(rx - 0.48, ry - 0.02);
+      const leftMotorDist = Math.hypot(rx + 0.48, ry - 0.02);
+      const erdRight = -4.2 * Math.exp(-(rightMotorDist * rightMotorDist) / 0.10);
+      const ersLeft = 0.7 * Math.exp(-(leftMotorDist * leftMotorDist) / 0.14);
+      return {
+        theta: +(0.3 * Math.exp(-(ry + 0.4) * (ry + 0.4) / 0.3)).toFixed(2),
+        mu: +(erdRight + ersLeft).toFixed(2),
+        beta: +(0.82 * erdRight + 0.4 * ersLeft).toFixed(2),
+        gamma: +(0.9 * Math.exp(-(rightMotorDist * rightMotorDist) / 0.12)).toFixed(2)
+      };
+    } else if (task === "SUB") {
+      // Frontal midline theta increase (Fz, AF3/4, F3/4) + bilateral parietal (P3/P4) beta modulation + posterior alpha ERS
+      const frontalDist = Math.hypot(rx, ry + 0.52);
+      const parietalDist = Math.min(Math.hypot(rx + 0.40, ry - 0.50), Math.hypot(rx - 0.40, ry - 0.50));
+      return {
+        theta: +(2.9 * Math.exp(-(frontalDist * frontalDist) / 0.18)).toFixed(2),
+        mu: +(1.4 * Math.exp(-((ry - 0.72) * (ry - 0.72)) / 0.18) - 0.8 * Math.exp(-(parietalDist * parietalDist) / 0.12)).toFixed(2),
+        beta: +(-1.6 * Math.exp(-(parietalDist * parietalDist) / 0.15) + 0.7 * Math.exp(-(frontalDist * frontalDist) / 0.22)).toFixed(2),
+        gamma: +(1.1 * Math.exp(-(frontalDist * frontalDist) / 0.20)).toFixed(2)
+      };
+    } else {
+      // WG: Left fronto-temporal / temporo-parietal (F5, FC5, TP7, P5) beta/mu desynchronization + frontal theta
+      const brocaDist = Math.hypot(rx + 0.68, ry + 0.20);
+      const wernickeDist = Math.hypot(rx + 0.74, ry - 0.32);
+      const langFocus = Math.exp(-(brocaDist * brocaDist) / 0.14) + 0.85 * Math.exp(-(wernickeDist * wernickeDist) / 0.16);
+      return {
+        theta: +(1.8 * langFocus + 0.8 * Math.exp(-(rx * rx + (ry + 0.5) * (ry + 0.5)) / 0.25)).toFixed(2),
+        mu: +(-2.1 * langFocus).toFixed(2),
+        beta: +(-2.6 * langFocus).toFixed(2),
+        gamma: +(1.3 * langFocus).toFixed(2)
+      };
+    }
+  }
+
+  function modulationColor(el, task) {
+    const mod = computeBandModulation(el, task);
+    const primary = task === "MI" ? mod.mu : (task === "SUB" ? mod.theta - mod.beta * 0.5 : mod.beta);
+    if (primary <= -2.2) return "#0ea5e9"; // Deep ERD blue
+    if (primary <= -0.9) return "#38bdf8"; // Moderate ERD cyan
+    if (primary >= 1.8)  return "#f59e0b"; // Strong task synchronisation amber
+    if (primary >= 0.8)  return "#34d399"; // Mild activation emerald
+    return cssVar("--bg-elevated");
+  }
+
+  function renderScalp() {
+    const svg = document.getElementById("scalpSvg");
+    const cx = 280, cy = 278, headR = 212;
+    const strokeCol = cssVar("--border-subtle");
+    const textCol = cssVar("--text-main");
+    const mutedCol = cssVar("--text-muted");
+
+    let parts = [];
+    // Nose & ears
+    parts.push(`<polygon points="${cx - 24},${cy - headR + 4} ${cx},${cy - headR - 30} ${cx + 24},${cy - headR + 4}" fill="none" stroke="${strokeCol}" stroke-width="2.5"/>`);
+    parts.push(`<ellipse cx="${cx - headR - 10}" cy="${cy}" rx="11" ry="34" fill="none" stroke="${strokeCol}" stroke-width="2.5"/>`);
+    parts.push(`<ellipse cx="${cx + headR + 10}" cy="${cy}" rx="11" ry="34" fill="none" stroke="${strokeCol}" stroke-width="2.5"/>`);
+    // Head circle & 10-10 guide rings
+    parts.push(`<circle cx="${cx}" cy="${cy}" r="${headR}" fill="none" stroke="${strokeCol}" stroke-width="2.8"/>`);
+    parts.push(`<circle cx="${cx}" cy="${cy}" r="${headR * 0.72}" fill="none" stroke="${strokeCol}" stroke-dasharray="4,5" stroke-width="1"/>`);
+    parts.push(`<line x1="${cx - headR}" y1="${cy}" x2="${cx + headR}" y2="${cy}" stroke="${strokeCol}" stroke-dasharray="4,5" stroke-width="1"/>`);
+    parts.push(`<line x1="${cx}" y1="${cy - headR}" x2="${cx}" y2="${cy + headR}" stroke="${strokeCol}" stroke-dasharray="4,5" stroke-width="1"/>`);
+
+    // ERD / Task hotspot halo
+    if (selectedTask === "MI") {
+      parts.push(`<circle cx="${cx + 0.50 * headR}" cy="${cy + 0.02 * headR}" r="66" fill="rgba(14,165,233,0.18)" stroke="#38bdf8" stroke-dasharray="5,4" stroke-width="1.5"/>`);
+      parts.push(`<text x="${cx + 0.50 * headR}" y="${cy + 84}" text-anchor="middle" fill="#38bdf8" font-size="10.5" font-weight="700">Contralateral SMR ERD</text>`);
+    } else if (selectedTask === "SUB") {
+      parts.push(`<circle cx="${cx}" cy="${cy - 0.48 * headR}" r="54" fill="rgba(251,191,36,0.16)" stroke="#fbbf24" stroke-dasharray="5,4" stroke-width="1.5"/>`);
+    } else {
+      parts.push(`<circle cx="${cx - 0.66 * headR}" cy="${cy - 0.02 * headR}" r="62" fill="rgba(56,189,248,0.16)" stroke="#38bdf8" stroke-dasharray="5,4" stroke-width="1.5"/>`);
+    }
+
+    parts.push(`<text x="${cx}" y="22" text-anchor="middle" fill="${mutedCol}" font-size="11.5" font-weight="700">NASION (FRONT) &bull; LEFT HEMISPHERE &larr; | &rarr; RIGHT HEMISPHERE</text>`);
+
+    ELECTRODES.forEach(function(el) {
+      const ex = cx + el.x * headR;
+      const ey = cy + el.y * headR;
+      const inGroup = selectedGroup === "ALL" || el.grp === selectedGroup;
+      const isSel = el.id === selectedElectrode;
+      const opacity = inGroup ? 1.0 : 0.24;
+      const fillCol = modulationColor(el, selectedTask);
+      const rad = el.active41 ? 14.5 : 12.0;
+      const dash = el.active41 ? "" : `stroke-dasharray="3,2"`;
+      const ringStroke = isSel ? "#fbbf24" : (el.active41 ? textCol : mutedCol);
+      const ringW = isSel ? 3.4 : 1.5;
+
+      parts.push(
+        `<g class="electrode-node" data-el="${el.id}" opacity="${opacity}">` +
+        `<circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="${rad}" fill="${fillCol}" stroke="${ringStroke}" stroke-width="${ringW}" ${dash}/>` +
+        `<text x="${ex.toFixed(1)}" y="${(ey + 3.8).toFixed(1)}" text-anchor="middle" fill="${textCol}" font-size="9.5" font-weight="700">${el.id}</text>` +
+        `</g>`
+      );
+    });
+
+    // Legend at bottom
+    parts.push(`<text x="${cx}" y="525" text-anchor="middle" fill="${mutedCol}" font-size="11">Cyan/Blue = 8&ndash;30 Hz Power Drop (ERD) &bull; Amber/Green = Task Power Increase &bull; Dashed = 10-10 Landmark</text>`);
+    svg.innerHTML = parts.join("");
+
+    svg.querySelectorAll(".electrode-node").forEach(function(node) {
+      node.addEventListener("click", function() {
+        selectedElectrode = node.getAttribute("data-el");
+        renderScalp();
+      });
+    });
+
+    updateElectrodeInspector();
+  }
+
+  function updateElectrodeInspector() {
+    const el = ELECTRODES.find(function(item) { return item.id === selectedElectrode; }) || ELECTRODES[23];
+    const grpNames = {
+      SMR: "Sensorimotor Strip (FC* / C* / CP* — Primary Motor & Somatosensory)",
+      FP: "Fronto-Parietal Executive Network (AF* / F* / P*)",
+      PO: "Parieto-Occipital & Temporo-Parietal (PO* / TP*)",
+      REF: "10-10 Anatomical Reference Landmark (outside 41-ch PROTEUS subset)"
+    };
+    const hemi = el.x < -0.05 ? "Left Hemisphere" : (el.x > 0.05 ? "Right Hemisphere" : "Midline Sagittal Plane");
+    document.getElementById("elTitle").textContent = `Electrode ${el.id} — ${hemi}`;
+    document.getElementById("elSummary").textContent = el.region;
+    document.getElementById("elStatus").textContent = el.active41 ? "Active PROTEUS Channel (1 of 41 recorded channels)" : "10-10 Reference Landmark (interpolated via nearest AF/PO channels when aligning external corpora)";
+    document.getElementById("elGroup").textContent = grpNames[el.grp];
+    document.getElementById("elHemi").textContent = hemi;
+    document.getElementById("elH10Role").textContent = el.id === "C4"
+      ? "Direct C4 contralateral power feature (c4_direct_lam = 0.20 in ANCHOR-MM), 41x41 6-band covariance, CNN40 spatial filters, and Session CSP"
+      : (el.grp === "SMR"
+          ? "Core sensorimotor covariance channel in 8-13 Hz mu & 13-30 Hz beta passbands, CNN40 spatial filters, and Session CSP+LDA"
+          : "6-D non-motor PseudoChrono drift subspace feature, ArtifactGuard z-score monitor, and 41-channel multimodal spatial context");
+
+    const mod = computeBandModulation(el, selectedTask);
+    const bandSpecs = [
+      { label: "Theta (4-8 Hz)", val: mod.theta },
+      { label: "Mu / Alpha (8-13 Hz)", val: mod.mu },
+      { label: "Beta (13-30 Hz)", val: mod.beta },
+      { label: "Low-Gamma (30-45 Hz)", val: mod.gamma }
+    ];
+    document.getElementById("elBands").innerHTML = bandSpecs.map(function(b) {
+      const pct = Math.min(100, Math.max(6, Math.round(50 + b.val * 11)));
+      const col = b.val < -0.5 ? "#38bdf8" : (b.val > 0.5 ? "#fbbf24" : "#94a3b8");
+      const signStr = (b.val >= 0 ? "+" : "") + b.val.toFixed(2) + " dB";
+      return `<div class="bar-row">` +
+        `<span style="width:142px;">${b.label}</span>` +
+        `<div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${col};"></div></div>` +
+        `<span style="width:68px;text-align:right;font-family:var(--font-mono);">${signStr}</span>` +
+        `</div>`;
+    }).join("");
+  }
+
+  document.querySelectorAll("#topoTaskBtns .pill-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      document.querySelectorAll("#topoTaskBtns .pill-btn").forEach(function(b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      selectedTask = btn.getAttribute("data-task");
+      renderScalp();
+    });
+  });
+
+  document.querySelectorAll("#topoGroupBtns .pill-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      document.querySelectorAll("#topoGroupBtns .pill-btn").forEach(function(b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      selectedGroup = btn.getAttribute("data-group");
+      renderScalp();
+    });
+  });
+
+  // =========================================================================
+  // 2. INTERACTIVE 12-STAGE H10 SIGNAL-FLOW EXPLORER
+  // =========================================================================
+  const STAGES = [
+    {
+      id: "S1", code: "[G] PaceGuard", x: 18, y: 150, w: 132, h: 76, maxTier: 3,
+      cls: "neurips_bci.adaptation.gate_adapters.SessionPaceGateAdapter",
+      role: "Measures session wall-clock time and global run elapsed time before every window to pick active tier 0..3. Guarantees zero 4,800 s worker timeouts even under severe GPU/CPU contention.",
+      eq: "c_t = F0 + b * t - elapsed_session_s   (r45: b = 0.29 s/w, F0 in {14s, 6s}; global T1=3550s, T2=4300s, T3=4420s)",
+      shapes: "wall_clock_s: float -> active_tier tau_t in {0, 1, 2, 3}",
+      symbol: "tau_t (monotonically non-decreasing within each session; reset in reset_state())",
+      tierRule: "Active at all Tiers 0..3 (controls all downstream shedding switches)."
+    },
+    {
+      id: "S2", code: "[P] Sanitize", x: 170, y: 150, w: 120, h: 76, maxTier: 3,
+      cls: "neurips_bci.operator.signal_operators.SpectralSignalOperator",
+      role: "Replaces any NaN or +/-Inf samples with 0.0 and subtracts each channel's temporal mean across the 480 samples to eliminate DC electrode offset.",
+      eq: "x_clean[c, n] = finite(x_raw[c, n]) - (1/480) * sum_{k=1..480} finite(x_raw[c, k])",
+      shapes: "x_raw: (1, 41, 480) float32 -> x_clean: (41, 480) float32",
+      symbol: "x_clean",
+      tierRule: "Active at all Tiers 0..3 (guarantees survival on NaN, Inf, and flatline hostile inputs)."
+    },
+    {
+      id: "S3", code: "[A] ArtifactGuard", x: 310, y: 150, w: 140, h: 76, maxTier: 3,
+      cls: "neurips_bci.adaptation.signal_adapters.CausalArtifactSignalAdapter",
+      role: "Flags muscle bursts or electrode pops using causal median/MAD z-scores of peak amplitude and broadband log-determinant (z > 8.0), soft-clipping samples beyond 32 robust scales.",
+      eq: "ok_t = 1[z_amp(x_clean) <= 8.0 and z_logdet(C_t) <= 8.0];  samples |x| > 32*sigma_mad soft-clipped -> 8*sigma_mad",
+      shapes: "x_clean: (41, 480) -> x_guard: (41, 480), ok_t: bool",
+      symbol: "(x_guard, ok_t)",
+      tierRule: "Active at all Tiers 0..3; flagged windows (ok_t=0) are predicted but excluded from EA/BN/Tent/ST updates."
+    },
+    {
+      id: "S4", code: "[E] PseudoChrono EA", x: 470, y: 150, w: 152, h: 76, maxTier: 3,
+      cls: "neurips_bci.adaptation.signal_adapters.PseudoChronoSignalAdapter",
+      role: "Computes 6 band covariances (4-8, 8-13, 13-20, 20-30, 30-45, 1-45 Hz) + broadband, and whitens x_guard using past clean windows weighted by 6-D non-motor drift similarity K_{t,s}.",
+      eq: "K_{t,s} = ok_s * exp(-||u_t - u_s||^2 / (2 * 6 * 1.3^2)) (s < t);   w_t = R_t^(-1/2) x_guard",
+      shapes: "x_guard: (41, 480) -> w_t: (41, 480), band_covs: (6, 41, 41)",
+      symbol: "w_t, {C_t^(b)}",
+      tierRule: "Active at all Tiers 0..3 (essential for cross-subject whitening on both O0 and shuffled OW5)."
+    },
+    {
+      id: "S5", code: "[C] CNN40 (160 Nets)", x: 648, y: 26, w: 168, h: 80, maxTier: 3,
+      cls: "neurips_bci.organ.cnn_organs.DualBlockCnnEnsembleCnnOrgan",
+      role: "Core 2-block x 80-net ensemble (Shallow25, FBCNet, distilled FBModNet, distilled Shallow49) + PseudoChrono BN + Tent (t<130) + ST/AG3 at 66,126 + Tangent LR + Session CSP/LDA + Specialists.",
+      eq: "u_cnn40 = 0.5 * Bal(BlockA(w_t)) + 0.5 * Bal(BlockB(w_t))   (160 PyTorch state_dicts, zero pickles)",
+      shapes: "w_t: (41, 480), {C_t^(b)} -> u_cnn40: (3,), u_shallow_stoff: (3,)",
+      symbol: "u_cnn40",
+      tierRule: "Runs at Tiers 0..3. Tier 1 freezes Tent (keeps ST in r45); Tier >= 2 skips ST; Tier 3 returns u_cnn40 directly."
+    },
+    {
+      id: "S6", code: "[F1] EEGPT-19 Bank", x: 648, y: 122, w: 168, h: 68, maxTier: 2,
+      cls: "neurips_bci.organ.foundation_organs.QuadViewEegptFoundationOrgan",
+      role: "Frozen EEGPT encoder compressed via rank-64 SVD feeding 19 multi-corpus probes (8 lat52, 3 rms56, 6 clean4, 2 rms4c) refitted at windows 66 & 126 via exact float64 Cholesky Newton steps.",
+      eq: "u_lat52, u_rms56 = CholeskyNewtonProbeBank(EEGPT_fp16(PseudoChrono(x_guard)))",
+      shapes: "x_guard: (41, 480) -> u_lat52: (3,), u_rms56: (3,)",
+      symbol: "u_lat52, u_rms56",
+      tierRule: "Full 19-seed bank at Tiers 0..1; slimmed secondary pass at Tier 2; shed at Tier 3."
+    },
+    {
+      id: "S7", code: "[F2] TSR4 & RSNSE", x: 648, y: 204, w: 168, h: 68, maxTier: 2,
+      cls: "neurips_bci.organ.riemannian_organs.SubwindowGeodesicRiemannianOrgan",
+      role: "TSR4 classifies multi-band sub-window tangent vectors (weight 0.07 in Traj A); RSNSE averages a 5-seed Riemannian subspace MLP ensemble (weight 0.08 in Traj B).",
+      eq: "u_tsr4 = Softmax(W_tsr * LogMap_I(C_sub));   u_rsnse = Mean_{m=1..5} MLP_m(SubspaceProj(C_t))",
+      shapes: "{C_t^(b)}: (6, 41, 41) -> u_tsr4: (3,), u_rsnse: (3,)",
+      symbol: "u_tsr4, u_rsnse",
+      tierRule: "TSR4 active at Tiers 0..2; RSNSE active at Tiers 0..1 (shed at Tier >= 2)."
+    },
+    {
+      id: "S8", code: "[F3] CodeBrain/CBraMod/MIRep", x: 648, y: 286, w: 168, h: 84, maxTier: 1,
+      cls: "neurips_bci.organ.foundation_organs.CodebrainLoraFoundationOrgan",
+      role: "Three public EEG foundation encoders bundled in pure-NumPy float16: CodeBrain + 2-seed 4-corpus Rank-8 LoRA (0.15), CBraMod (0.10), and MIRepNet (0.10).",
+      eq: "h_cd = FrozenCodeBrain(x) + B_lora8 * A_lora8(x);   u_cd, u_cb, u_mr in Delta^3",
+      shapes: "x_guard: (41, 480) -> u_cd: (3,), u_cb: (3,), u_mr: (3,), q_embed: (16,)",
+      symbol: "u_cd, u_cb, u_mr",
+      tierRule: "CodeBrain & MIRepNet active at Tier 0 (shed at Tier >= 1); CBraMod active at Tiers 0..1 (shed at Tier >= 2)."
+    },
+    {
+      id: "S9", code: "[M1] Traj A/B + ANCHOR-MM", x: 844, y: 34, w: 136, h: 86, maxTier: 2,
+      cls: "neurips_bci.organ.multimodal_organs.AnchorSpecialistMultimodalOrgan",
+      role: "Blends ratio-balanced Traj A (0.40) + Kalman-balanced Traj B (0.60), adds GPU float64 ANCHOR-MM dispersion/prototype residuals (lam_dm=0.52, lam_proto=0.13), and emits multimodal ST teacher labels at 66, 126.",
+      eq: "log p_m1 = log(0.40 * p_A + 0.60 * p_B) + 0.52 * r_dm + 0.13 * r_proto + 0.20 * r_c4",
+      shapes: "u_cnn40, u_eegpt, u_tsr4, u_rsnse -> p_m1: (3,), p_teacher: (3,)",
+      symbol: "p_m1, p_teacher",
+      tierRule: "Traj A/B active Tiers 0..2; ANCHOR-MM GPU float64 active Tiers 0..1 (shed at Tier >= 2)."
+    },
+    {
+      id: "S10", code: "[M2] +Shallow_STOFF", x: 844, y: 138, w: 136, h: 68, maxTier: 2,
+      cls: "neurips_bci.organ.cnn_organs.DualBlockCnnEnsembleCnnOrgan",
+      role: "Adds a +0.06 log-probability anchor from the un-self-trained ShallowConvNet copy so self-training pseudo-label noise at 66/126 cannot cause late-session runaway drift.",
+      eq: "log p_m2 = log p_m1 + 0.06 * log(u_shallow_stoff)",
+      shapes: "p_m1: (3,), u_shallow_stoff: (3,) -> p_m2: (3,)",
+      symbol: "p_m2",
+      tierRule: "Active at Tiers 0..2 (zero extra forward cost beyond cached pre-ST weights when ST has fired)."
+    },
+    {
+      id: "S11", code: "[M3] PC-Sinkhorn", x: 844, y: 222, w: 136, h: 68, maxTier: 1,
+      cls: "neurips_bci.adaptation.probability_adapters.PseudoChronoSinkhornProbabilityAdapter",
+      role: "4-iteration causal Sinkhorn-Knopp scaling weighted by PseudoChrono kernel K_{t,s} (tau=1.3, prior=10.0) to keep predicted class frequencies balanced inside each session interface cell.",
+      eq: "Q^(k) = NormalizeRows(u_{0..t} * c^(k));   c^(k+1) = c^(k) / (3 * m_pc(Q^(k)))   (4 iters)",
+      shapes: "p_m2 history (t, 3), K_past (t, t) -> p_sk: (3,)",
+      symbol: "p_sk",
+      tierRule: "Active at Tiers 0..1 (< 0.05 ms/window); bypassed to fast ratio balancer at Tier >= 2."
+    },
+    {
+      id: "S12", code: "[M4] G1 Gate + S3D", x: 998, y: 134, w: 126, h: 108, maxTier: 1,
+      cls: "neurips_bci.decoder.ensemble_decoders.H10MultimodalEnsembleDecoder",
+      role: "Applies causal G1 excess-agreement reliability gate g_t in [0.25, 1.00] to foundation organs and adds online 16-D Fisher subspace anchored ridge (S3D, weight 0.12), outputting argmax class.",
+      eq: "log p_t = log p_sk + g_cd*0.15*log u_cd + g_cb*0.10*log u_cb + g_mr*0.10*log u_mr + 0.12*log u_s3d",
+      shapes: "p_sk, u_fm, u_s3d -> p_t: (1, 3), y_hat_t: (1,) in {0: MI, 1: SUB, 2: WG}",
+      symbol: "p_t, y_hat_t",
+      tierRule: "S3D, CodeBrain, MIRepNet active at Tier 0; CBraMod gated at Tiers 0..1; final argmax active Tiers 0..3."
+    }
+  ];
+
+  let activeFlowTier = 0;
+  let selectedStageId = "S1";
+
+  function isStageActiveAtTier(st, tier) {
+    if (st.id === "S8") return tier <= 1; // CBraMod stays in T1, CD/MR in T0
+    return tier <= st.maxTier;
+  }
+
+  function renderFlow() {
+    const svg = document.getElementById("flowSvg");
+    const borderCol = cssVar("--border-subtle");
+    const cardBg = cssVar("--bg-elevated");
+    const textCol = cssVar("--text-main");
+    const mutedCol = cssVar("--text-muted");
+    const accent = cssVar("--accent-primary");
+    const green = cssVar("--accent-secondary");
+
+    const edges = [
+      ["S1", "S2"], ["S2", "S3"], ["S3", "S4"],
+      ["S4", "S5"], ["S4", "S6"], ["S4", "S7"], ["S3", "S8"],
+      ["S5", "S9"], ["S6", "S9"], ["S7", "S9"],
+      ["S9", "S10"], ["S5", "S10"], ["S10", "S11"],
+      ["S11", "S12"], ["S8", "S12"]
+    ];
+    const byId = {};
+    STAGES.forEach(function(s) { byId[s.id] = s; });
+
+    let parts = [];
+    // Edges
+    edges.forEach(function(pair) {
+      const a = byId[pair[0]], b = byId[pair[1]];
+      const x1 = a.x + a.w, y1 = a.y + a.h / 2;
+      const x2 = b.x,       y2 = b.y + b.h / 2;
+      const mx = 0.5 * (x1 + x2);
+      const bothOn = isStageActiveAtTier(a, activeFlowTier) && isStageActiveAtTier(b, activeFlowTier);
+      const col = bothOn ? accent : borderCol;
+      const op = bothOn ? 0.72 : 0.22;
+      parts.push(`<path d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}" fill="none" stroke="${col}" stroke-width="2" opacity="${op}"/>`);
+    });
+
+    // Teacher feedback dashed arc from S9 back to S5 & S6
+    const fbOp = activeFlowTier <= 1 ? 0.85 : 0.18;
+    parts.push(`<path d="M912,34 C912,6 732,6 732,26" fill="none" stroke="#fbbf24" stroke-dasharray="5,4" stroke-width="1.8" opacity="${fbOp}"/>`);
+    parts.push(`<text x="822" y="16" text-anchor="middle" fill="#fbbf24" font-size="10.5" font-weight="700" opacity="${fbOp}">Multimodal ST Teacher Pseudo-Labels (t = 66, 126)</text>`);
+
+    STAGES.forEach(function(st) {
+      const on = isStageActiveAtTier(st, activeFlowTier);
+      const sel = st.id === selectedStageId;
+      const op = on ? 1.0 : 0.28;
+      const stroke = sel ? "#fbbf24" : (on ? accent : borderCol);
+      const sw = sel ? 3.0 : 1.6;
+      const badgeText = on
+        ? (st.id === "S8" && activeFlowTier === 1 ? "CBraMod ONLY" : "ACTIVE")
+        : "SHED";
+      const badgeCol = on ? green : "#fb7185";
+
+      parts.push(
+        `<g class="stage-node" data-st="${st.id}" opacity="${op}">` +
+        `<rect x="${st.x}" y="${st.y}" width="${st.w}" height="${st.h}" rx="9" fill="${cardBg}" stroke="${stroke}" stroke-width="${sw}"/>` +
+        `<text x="${st.x + st.w / 2}" y="${st.y + st.h / 2 - 5}" text-anchor="middle" fill="${textCol}" font-size="11.5" font-weight="700">${st.code}</text>` +
+        `<text x="${st.x + st.w / 2}" y="${st.y + st.h / 2 + 15}" text-anchor="middle" fill="${badgeCol}" font-size="9.5" font-weight="700">${badgeText}</text>` +
+        `</g>`
+      );
+    });
+
+    svg.innerHTML = parts.join("");
+    svg.querySelectorAll(".stage-node").forEach(function(node) {
+      node.addEventListener("click", function() {
+        selectedStageId = node.getAttribute("data-st");
+        renderFlow();
+      });
+    });
+
+    const cur = byId[selectedStageId] || STAGES[0];
+    document.getElementById("stTitle").textContent = cur.code;
+    document.getElementById("stClassPath").textContent = cur.cls;
+    document.getElementById("stRole").textContent = cur.role;
+    document.getElementById("stEquation").textContent = cur.eq;
+    document.getElementById("stShapes").textContent = cur.shapes;
+    document.getElementById("stSymbol").textContent = cur.symbol;
+    document.getElementById("stTierRule").textContent = cur.tierRule;
+  }
+
+  document.querySelectorAll("#flowTierBtns .pill-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      document.querySelectorAll("#flowTierBtns .pill-btn").forEach(function(b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      activeFlowTier = parseInt(btn.getAttribute("data-tier"), 10);
+      renderFlow();
+    });
+  });
+
+  // =========================================================================
+  // 3. PACE-GUARD TIER SIMULATOR (SUBMISSION 6 r35 vs SUBMISSION 7 r45)
+  // =========================================================================
+  let simTotalWindows = 14166;
+  const speedSlider = document.getElementById("speedSlider");
+  const sessSlider = document.getElementById("sessSlider");
+
+  function simulatePackageRun(pkg, speedFactor, totalWindows) {
+    // Grounded in s40/s45/s47 certified platform measurements:
+    // Local RTX PRO 6000 baseline: r35 = 131.0 ms/w overall (82 ms ordinary + ST spikes at 66, 126);
+    // r45 = 97.2 ms/w overall (61 ms ordinary + GPU float64 ANCHOR-MM + ST spikes at 66, 126).
+    const nSessions = totalWindows === 14166 ? 65 : 77;
+    const winPerSess = Math.round(totalWindows / nSessions); // ~218 or ~234
+    const isR45 = pkg === "r45";
+
+    const budgetPerWin = isR45 ? 0.290 : 0.205;
+    const fastThresh = isR45 ? 0.300 : 0.195;
+    const baseOrdSec = (isR45 ? 0.064 : 0.094) * speedFactor;
+    const tierScale = [1.00, 0.72, 0.46, 0.26];
+    const stSpikeSec = (isR45 ? 2.45 : 2.75) * speedFactor;
+
+    const globalT1 = isR45 ? 3550.0 : 1e9;
+    const globalT2 = isR45 ? 4300.0 : 3700.0;
+    const globalT3 = isR45 ? 4420.0 : 4100.0;
+    const keepStInT1 = isR45;
+
+    let runClock = 0.0;
+    const tierCounts = [0, 0, 0, 0];
+    const sessionTraces = [];
+    let totalAccDropPp = 0.0;
+
+    for (let s = 0; s < nSessions; s++) {
+      // Deterministic tiny session-to-session variance
+      const sessJitter = 1.0 + 0.04 * Math.sin(s * 1.7 + 0.4);
+      const ordLatency = baseOrdSec * sessJitter;
+      const f0 = ordLatency <= fastThresh ? 14.0 : 6.0;
+      let sessElapsed = 0.0;
+      let curTier = 0;
+      let firstShedWin = 999;
+      const credits = [];
+      const tiers = [];
+
+      for (let w = 1; w <= winPerSess; w++) {
+        // Global run-clock floor
+        if (runClock >= globalT3) curTier = Math.max(curTier, 3);
+        else if (runClock >= globalT2) curTier = Math.max(curTier, 2);
+        else if (runClock >= globalT1) curTier = Math.max(curTier, 1);
+
+        let stepSec = ordLatency * tierScale[curTier];
+        if (w === 66 || w === 126) {
+          const runSt = curTier === 0 || (curTier === 1 && keepStInT1);
+          if (runSt) stepSec += stSpikeSec;
+        }
+        sessElapsed += stepSec;
+        runClock += stepSec;
+
+        const credit = f0 + budgetPerWin * w - sessElapsed;
+        if (credit < 0.2) curTier = Math.max(curTier, 3);
+        else if (credit < 0.6) curTier = Math.max(curTier, 2);
+        else if (credit < 1.2) curTier = Math.max(curTier, 1);
+
+        if (curTier > 0 && firstShedWin === 999) firstShedWin = w;
+        credits.push(credit);
+        tiers.push(curTier);
+      }
+
+      const endTier = curTier;
+      tierCounts[endTier]++;
+
+      // Accuracy cost model from s40 16-fold shedding cost table
+      let sessCost = 0.0;
+      if (endTier > 0) {
+        if (firstShedWin <= 66) {
+          if (endTier === 1) sessCost = keepStInT1 ? 0.55 : 2.10;
+          else if (endTier === 2) sessCost = 4.60;
+          else sessCost = 6.80;
+        } else if (firstShedWin <= 126) {
+          if (endTier === 1) sessCost = keepStInT1 ? 0.22 : 0.78;
+          else if (endTier === 2) sessCost = 1.76;
+          else sessCost = 2.56;
+        } else {
+          sessCost = endTier === 1 ? 0.12 : (endTier === 2 ? 0.55 : 0.74);
+        }
+      }
+      totalAccDropPp += sessCost / nSessions;
+      sessionTraces.push({ credits: credits, tiers: tiers, endTier: endTier, f0: f0 });
+    }
+
+    return {
+      nSessions: nSessions,
+      winPerSess: winPerSess,
+      totalSeconds: runClock,
+      survived: runClock < 4800.0,
+      tierCounts: tierCounts,
+      accDropPp: totalAccDropPp,
+      projectedO0: Math.max(73.5, 82.66 - totalAccDropPp),
+      projectedSealed: Math.max(0.740, 0.830 - totalAccDropPp / 100.0),
+      traces: sessionTraces
+    };
+  }
+
+  function renderSimulator() {
+    const speed = parseFloat(speedSlider.value);
+    const nSessMax = simTotalWindows === 14166 ? 65 : 77;
+    sessSlider.max = String(nSessMax);
+    if (parseInt(sessSlider.value, 10) > nSessMax) sessSlider.value = String(nSessMax);
+    const sessIdx = parseInt(sessSlider.value, 10) - 1;
+
+    document.getElementById("speedVal").textContent = speed.toFixed(2) + "x";
+    document.getElementById("sessVal").textContent = `Session ${sessIdx + 1} / ${nSessMax}`;
+
+    const r35 = simulatePackageRun("r35", speed, simTotalWindows);
+    const r45 = simulatePackageRun("r45", speed, simTotalWindows);
+
+    // Summary cards
+    const cWrap = document.getElementById("simSummaryCards");
+    cWrap.innerHTML = [
+      {
+        lbl: "Sub 6 (r35) Total Runtime",
+        num: `${Math.round(r35.totalSeconds).toLocaleString()} s`,
+        col: r35.survived ? "var(--accent-amber)" : "var(--accent-rose)",
+        sub: r35.survived ? `Margin: ${Math.round(4800 - r35.totalSeconds)} s under 4,800 s cap` : "TIMEOUT (> 4,800 s)"
+      },
+      {
+        lbl: "Sub 7 (r45) Total Runtime",
+        num: `${Math.round(r45.totalSeconds).toLocaleString()} s`,
+        col: r45.survived ? "var(--accent-secondary)" : "var(--accent-rose)",
+        sub: r45.survived ? `Margin: ${Math.round(4800 - r45.totalSeconds)} s under 4,800 s cap` : "TIMEOUT (> 4,800 s)"
+      },
+      {
+        lbl: "Sub 6 (r35) Shedding Impact",
+        num: `-${r35.accDropPp.toFixed(2)} pp`,
+        col: r35.accDropPp > 0.25 ? "var(--accent-rose)" : "var(--accent-primary)",
+        sub: `Tier 0 sessions: ${r35.tierCounts[0]}/${r35.nSessions} (Est. sealed ${r35.projectedSealed.toFixed(3)})`
+      },
+      {
+        lbl: "Sub 7 (r45) Shedding Impact",
+        num: `-${r45.accDropPp.toFixed(2)} pp`,
+        col: r45.accDropPp <= 0.15 ? "var(--accent-secondary)" : "var(--accent-amber)",
+        sub: `Tier 0 sessions: ${r45.tierCounts[0]}/${r45.nSessions} (Est. sealed ${r45.projectedSealed.toFixed(3)})`
+      }
+    ].map(function(c) {
+      return `<div class="kpi-card"><div class="kpi-label">${c.lbl}</div>` +
+        `<div class="kpi-num" style="color:${c.col};font-size:1.38rem;">${c.num}</div>` +
+        `<div class="kpi-sub">${c.sub}</div></div>`;
+    }).join("");
+
+    // Left SVG: Session Credit Trace
+    const creditSvg = document.getElementById("creditSvg");
+    const tr35 = r35.traces[sessIdx].credits;
+    const tr45 = r45.traces[sessIdx].credits;
+    const W = tr45.length;
+    const padL = 46, padR = 18, padT = 18, padB = 34;
+    const plotW = 560 - padL - padR, plotH = 270 - padT - padB;
+    const maxC = Math.max(18, ...tr35, ...tr45);
+    const minC = Math.min(-3, ...tr35, ...tr45);
+
+    function xMap(w) { return padL + (w / (W - 1)) * plotW; }
+    function yMap(c) { return padT + (1 - (c - minC) / (maxC - minC)) * plotH; }
+
+    const borderCol = cssVar("--border-subtle");
+    const mutedCol = cssVar("--text-muted");
+    const textCol = cssVar("--text-main");
+
+    let cParts = [];
+    // Axes & threshold lines
+    [0.2, 1.2, 10.0].forEach(function(th) {
+      if (th >= minC && th <= maxC) {
+        const yy = yMap(th);
+        const col = th <= 1.2 ? "#fb7185" : borderCol;
+        cParts.push(`<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${560 - padR}" y2="${yy.toFixed(1)}" stroke="${col}" stroke-dasharray="4,4" stroke-width="1"/>`);
+        cParts.push(`<text x="${padL - 5}" y="${(yy + 3.5).toFixed(1)}" text-anchor="end" fill="${mutedCol}" font-size="9.5">${th.toFixed(1)}s</text>`);
+      }
+    });
+    // Checkpoints 66 & 126
+    [66, 126].forEach(function(ck) {
+      const xx = xMap(ck - 1);
+      cParts.push(`<line x1="${xx.toFixed(1)}" y1="${padT}" x2="${xx.toFixed(1)}" y2="${270 - padB}" stroke="${borderCol}" stroke-dasharray="2,3" stroke-width="1"/>`);
+      cParts.push(`<text x="${xx.toFixed(1)}" y="${270 - 10}" text-anchor="middle" fill="${mutedCol}" font-size="9.5">ST w=${ck}</text>`);
+    });
+
+    const pts35 = tr35.map(function(v, i) { return `${xMap(i).toFixed(1)},${yMap(v).toFixed(1)}`; }).join(" ");
+    const pts45 = tr45.map(function(v, i) { return `${xMap(i).toFixed(1)},${yMap(v).toFixed(1)}`; }).join(" ");
+    cParts.push(`<polyline points="${pts35}" fill="none" stroke="#fbbf24" stroke-width="2.2"/>`);
+    cParts.push(`<polyline points="${pts45}" fill="none" stroke="#34d399" stroke-width="2.5"/>`);
+    cParts.push(`<text x="${padL + 8}" y="${padT + 14}" fill="#34d399" font-size="11" font-weight="700">&mdash; Sub 7 (r45, end Tier ${r45.traces[sessIdx].endTier})</text>`);
+    cParts.push(`<text x="${padL + 210}" y="${padT + 14}" fill="#fbbf24" font-size="11" font-weight="700">&mdash; Sub 6 (r35, end Tier ${r35.traces[sessIdx].endTier})</text>`);
+    creditSvg.innerHTML = cParts.join("");
+
+    // Right SVG: Tier distribution + Runtime vs 4800s
+    const tdSvg = document.getElementById("tierDistSvg");
+    const tierCols = ["#34d399", "#38bdf8", "#fbbf24", "#fb7185"];
+    let dParts = [];
+
+    function drawStackedRow(label, res, yTop) {
+      dParts.push(`<text x="14" y="${yTop + 16}" fill="${textCol}" font-size="11.5" font-weight="700">${label}</text>`);
+      let curX = 128;
+      const fullBarW = 360;
+      for (let t = 0; t < 4; t++) {
+        const cnt = res.tierCounts[t];
+        if (cnt > 0) {
+          const segW = (cnt / res.nSessions) * fullBarW;
+          dParts.push(`<rect x="${curX.toFixed(1)}" y="${yTop}" width="${segW.toFixed(1)}" height="24" fill="${tierCols[t]}" rx="2"/>`);
+          if (segW > 26) {
+            dParts.push(`<text x="${(curX + segW / 2).toFixed(1)}" y="${yTop + 16}" text-anchor="middle" fill="#061224" font-size="10" font-weight="800">T${t}:${cnt}</text>`);
+          }
+          curX += segW;
+        }
+      }
+    }
+
+    drawStackedRow("Sub 6 (r35)", r35, 22);
+    drawStackedRow("Sub 7 (r45)", r45, 62);
+
+    // Legend for Tiers
+    ["Tier 0 (Full)", "Tier 1", "Tier 2", "Tier 3"].forEach(function(nm, idx) {
+      const lx = 128 + idx * 92;
+      dParts.push(`<rect x="${lx}" y="100" width="10" height="10" fill="${tierCols[idx]}" rx="2"/>`);
+      dParts.push(`<text x="${lx + 14}" y="109" fill="${mutedCol}" font-size="10">${nm}</text>`);
+    });
+
+    // Runtime gauge vs 4,800s
+    const maxSecScale = 5200.0;
+    const killX = 128 + (4800.0 / maxSecScale) * 360;
+    dParts.push(`<text x="14" y="148" fill="${mutedCol}" font-size="10.5" font-weight="700">Total Worker Seconds vs 4,800 s Hard Timeout:</text>`);
+    [
+      { lbl: "Sub 6 (r35)", sec: r35.totalSeconds, y: 164, col: r35.survived ? "#fbbf24" : "#fb7185" },
+      { lbl: "Sub 7 (r45)", sec: r45.totalSeconds, y: 202, col: r45.survived ? "#34d399" : "#fb7185" }
+    ].forEach(function(row) {
+      const bw = Math.min(360, (row.sec / maxSecScale) * 360);
+      dParts.push(`<text x="14" y="${row.y + 15}" fill="${textCol}" font-size="11" font-weight="600">${row.lbl}</text>`);
+      dParts.push(`<rect x="128" y="${row.y}" width="360" height="20" fill="none" stroke="${borderCol}" rx="4"/>`);
+      dParts.push(`<rect x="128" y="${row.y}" width="${bw.toFixed(1)}" height="20" fill="${row.col}" rx="4"/>`);
+      dParts.push(`<text x="${134 + bw}" y="${row.y + 14}" fill="${textCol}" font-size="10.5" font-weight="700">${Math.round(row.sec)} s</text>`);
+    });
+    dParts.push(`<line x1="${killX.toFixed(1)}" y1="156" x2="${killX.toFixed(1)}" y2="234" stroke="#fb7185" stroke-width="2" stroke-dasharray="4,3"/>`);
+    dParts.push(`<text x="${killX.toFixed(1)}" y="252" text-anchor="middle" fill="#fb7185" font-size="10" font-weight="700">4,800 s Kill Limit</text>`);
+
+    tdSvg.innerHTML = dParts.join("");
+  }
+
+  speedSlider.addEventListener("input", renderSimulator);
+  sessSlider.addEventListener("input", renderSimulator);
+  document.querySelectorAll("#simStreamBtns .pill-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      document.querySelectorAll("#simStreamBtns .pill-btn").forEach(function(b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      simTotalWindows = parseInt(btn.getAttribute("data-windows"), 10);
+      renderSimulator();
+    });
+  });
+
+  // =========================================================================
+  // 4. MODEL EVOLUTION & 16-FOLD CV EXPLORER
+  // =========================================================================
+  const EVOLUTION = [
+    { tag: "j_k25",     o0: 69.79, ow5: "—",     sealed: "—",      desc: "10-seed ShallowConvNet baseline with online Euclidean alignment, adaptive BatchNorm, Tent, and class-ratio balancing.", key: "Causal EA + 10-seed ShallowConvNet + Tent" },
+    { tag: "v2.3",      o0: 74.54, ow5: "—",     sealed: "—",      desc: "20-seed ShallowConvNet (k=25) + 20-seed reflection-padded FBCNet + 6-band Riemannian tangent-space logistic regression.", key: "Filter-bank CNN + Riemannian tangent-space 3-expert blend" },
+    { tag: "v2.6",      o0: 77.35, ow5: "—",     sealed: "—",      desc: "Added live mid-session Common Spatial Patterns + LDA refitted at checkpoints and covariance-distance participant specialists.", key: "Live Session CSP+LDA + Participant Specialists" },
+    { tag: "v2.8",      o0: 78.25, ow5: "—",     sealed: "—",      desc: "Added mid-session CNN self-training (5 epochs ShallowNet, 10 epochs FBCNet) with replay buffer and robust ArtifactGuard.", key: "Causal CNN Self-Training + ArtifactGuard" },
+    { tag: "DualEEGPT", o0: 80.15, ow5: "76.27%", sealed: "0.8069", desc: "Upload 5: 2-block 160-net CNN40 + 19-seed frozen EEGPT Cholesky probes + TSR4 + RSNSE + ANCHOR-MM.", key: "Dual-Block CNN40 + 19-Probe EEGPT + ANCHOR-MM" },
+    { tag: "H10-r35",   o0: 82.66, ow5: "81.35%", sealed: "0.8230", desc: "Submission 6 (banked 0.823 in 3,175.05 s): PseudoChrono EA/BN/Sinkhorn + Distill-v2 CNN3/4 + CodeBrain LoRA8 + CBraMod + MIRepNet + G1 + S3D.", key: "PseudoChrono + Multimodal FM Zoo + Sinkhorn + S3D" },
+    { tag: "H10-r45",   o0: 82.66, ow5: "81.35%", sealed: "~0.830", desc: "Submission 7 certified package: exact Tier-0 parity (0 flips on 2,655 windows), GPU float64 ANCHOR-MM (-27% latency), relaxed 0.29 s/w PaceGuard.", key: "GPU float64 ANCHOR-MM + Zero-Shedding Safe Guard" }
+  ];
+
+  // Verified 16-fold H10 True-Live CV profiles (O0 k05 = 82.66%, OW5 k05 = 81.35%)
+  const FOLDS_16 = [
+    { idx: 0,  lbl: "P01",    reg: "LOSO",   o0: 77.38, ow5: 75.77, info: "Unseen participant P01 (1 session, 190 windows): +11.1 pp over j_k25 thanks to PseudoChrono EA + Multimodal FM + S3D." },
+    { idx: 1,  lbl: "P02",    reg: "LOSO",   o0: 85.24, ow5: 84.27, info: "Unseen participant P02 (1 session, 189 windows): clean contralateral SMR responder." },
+    { idx: 2,  lbl: "P03",    reg: "LOSO",   o0: 72.46, ow5: 71.33, info: "Unseen participant P03 (1 session, 189 windows): harder low-SNR motor imagery fold." },
+    { idx: 3,  lbl: "P04",    reg: "LOSO",   o0: 60.45, ow5: 59.32, info: "Unseen participant P04 (3 sessions streamed independently, 566 windows): hardest unseen participant in PROTEUS." },
+    { idx: 4,  lbl: "P05",    reg: "LOSO",   o0: 78.12, ow5: 76.86, info: "Unseen participant P05 (1 session, 190 windows): large whitening distance stabilized by multimodal teacher gate." },
+    { idx: 5,  lbl: "P06",    reg: "LOSO",   o0: 85.64, ow5: 83.61, info: "Unseen participant P06 (1 session, 187 windows): high-SNR sensorimotor and parietal rhythms." },
+    { idx: 6,  lbl: "P07",    reg: "LOSO",   o0: 90.18, ow5: 88.70, info: "Unseen participant P07 (1 session, 189 windows): near-ceiling zero-shot + online adaptation." },
+    { idx: 7,  lbl: "P08",    reg: "LOSO",   o0: 92.86, ow5: 92.10, info: "Unseen participant P08 (1 session, 189 windows): strongest single-session unseen participant." },
+    { idx: 8,  lbl: "P09",    reg: "LOSO",   o0: 83.14, ow5: 81.36, info: "Unseen participant P09 (1 session, 189 windows): +19.0 pp gain from j_k25 to H10." },
+    { idx: 9,  lbl: "P10",    reg: "LOSO",   o0: 67.66, ow5: 67.45, info: "Unseen participant P10 (3 sessions streamed independently, 577 windows): jumps to >90% once Session 1 is in training (XS4)." },
+    { idx: 10, lbl: "P04/S2", reg: "XS4",    o0: 74.68, ow5: 73.08, info: "Cross-session fold P04 Session 2 (Session 1 in training): +14.2 pp over unseen P04 via specialist & ANCHOR-MM priors." },
+    { idx: 11, lbl: "P04/S3", reg: "XS4",    o0: 83.95, ow5: 80.74, info: "Cross-session fold P04 Session 3 (Sessions 1+2 in training): strong returning-participant transfer." },
+    { idx: 12, lbl: "P10/S2", reg: "XS4",    o0: 91.15, ow5: 90.61, info: "Cross-session fold P10 Session 2 (Session 1 in training): +23.5 pp over unseen P10." },
+    { idx: 13, lbl: "P10/S3", reg: "XS4",    o0: 94.27, ow5: 94.05, info: "Cross-session fold P10 Session 3 (Sessions 1+2 in training): highest cross-session accuracy." },
+    { idx: 14, lbl: "P04/3*", reg: "XS1",    o0: 76.69, ow5: 74.98, info: "Single-prior-session diagnostic fold (P04 Session 3 trained with Session 2 held out; only Session 1 known)." },
+    { idx: 15, lbl: "P10/3*", reg: "XS1",    o0: 92.91, ow5: 92.02, info: "Single-prior-session diagnostic fold (P10 Session 3 trained with Session 2 held out; only Session 1 known)." }
+  ];
+
+  let selectedEvolIdx = 6;
+  let selectedCvOrder = "O0";
+  let selectedFoldIdx = 0;
+
+  function renderEvolution() {
+    const svg = document.getElementById("evolSvg");
+    const borderCol = cssVar("--border-subtle");
+    const textCol = cssVar("--text-main");
+    const mutedCol = cssVar("--text-muted");
+    const accent = cssVar("--accent-primary");
+    const green = cssVar("--accent-secondary");
+
+    const padL = 46, padR = 16, padT = 24, padB = 42;
+    const plotW = 580 - padL - padR, plotH = 285 - padT - padB;
+    const minY = 64, maxY = 86;
+
+    let parts = [];
+    [65, 70, 75, 80, 85].forEach(function(yv) {
+      const yy = padT + (1 - (yv - minY) / (maxY - minY)) * plotH;
+      parts.push(`<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${580 - padR}" y2="${yy.toFixed(1)}" stroke="${borderCol}" stroke-dasharray="3,4"/>`);
+      parts.push(`<text x="${padL - 6}" y="${(yy + 4).toFixed(1)}" text-anchor="end" fill="${mutedCol}" font-size="10">${yv}%</text>`);
+    });
+
+    const slotW = plotW / EVOLUTION.length;
+    EVOLUTION.forEach(function(ev, i) {
+      const bx = padL + i * slotW + slotW * 0.16;
+      const bw = slotW * 0.68;
+      const by = padT + (1 - (ev.o0 - minY) / (maxY - minY)) * plotH;
+      const bh = padT + plotH - by;
+      const isSel = i === selectedEvolIdx;
+      const col = i >= 5 ? green : accent;
+      const stroke = isSel ? "#fbbf24" : "none";
+
+      parts.push(
+        `<g style="cursor:pointer;" data-ev="${i}">` +
+        `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" rx="5" fill="${col}" stroke="${stroke}" stroke-width="2.6" opacity="${isSel ? 1 : 0.82}"/>` +
+        `<text x="${(bx + bw / 2).toFixed(1)}" y="${(by - 6).toFixed(1)}" text-anchor="middle" fill="${textCol}" font-size="10" font-weight="700">${ev.o0.toFixed(2)}%</text>` +
+        `<text x="${(bx + bw / 2).toFixed(1)}" y="${padT + plotH + 18}" text-anchor="middle" fill="${isSel ? "#fbbf24" : mutedCol}" font-size="10" font-weight="700">${ev.tag}</text>` +
+        `</g>`
+      );
+    });
+
+    svg.innerHTML = parts.join("");
+    svg.querySelectorAll("g[data-ev]").forEach(function(g) {
+      g.addEventListener("click", function() {
+        selectedEvolIdx = parseInt(g.getAttribute("data-ev"), 10);
+        renderEvolution();
+      });
+    });
+
+    const cur = EVOLUTION[selectedEvolIdx];
+    document.getElementById("evTitle").textContent = `${cur.tag} — Progression Milestone`;
+    document.getElementById("evDesc").textContent = cur.desc;
+    document.getElementById("evO0").textContent = cur.o0.toFixed(2) + "%";
+    document.getElementById("evOW5").textContent = cur.ow5;
+    document.getElementById("evSealed").textContent = cur.sealed;
+    document.getElementById("evKey").textContent = cur.key;
+  }
+
+  function renderFolds() {
+    const svg = document.getElementById("foldSvg");
+    const borderCol = cssVar("--border-subtle");
+    const textCol = cssVar("--text-main");
+    const mutedCol = cssVar("--text-muted");
+
+    const padL = 46, padR = 18, padT = 24, padB = 46;
+    const plotW = 1120 - padL - padR, plotH = 300 - padT - padB;
+    const minY = 50, maxY = 100;
+
+    let parts = [];
+    [50, 60, 70, 80, 90, 100].forEach(function(yv) {
+      const yy = padT + (1 - (yv - minY) / (maxY - minY)) * plotH;
+      parts.push(`<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${1120 - padR}" y2="${yy.toFixed(1)}" stroke="${borderCol}" stroke-dasharray="3,4"/>`);
+      parts.push(`<text x="${padL - 6}" y="${(yy + 4).toFixed(1)}" text-anchor="end" fill="${mutedCol}" font-size="10">${yv}%</text>`);
+    });
+
+    const slotW = plotW / FOLDS_16.length;
+    const regColor = { LOSO: "#38bdf8", XS4: "#34d399", XS1: "#a78bfa" };
+
+    FOLDS_16.forEach(function(f, i) {
+      const x0 = padL + i * slotW;
+      const isSel = i === selectedFoldIdx;
+      if (selectedCvOrder === "BOTH") {
+        const bw = slotW * 0.36;
+        const yO0 = padT + (1 - (f.o0 - minY) / (maxY - minY)) * plotH;
+        const yOW = padT + (1 - (f.ow5 - minY) / (maxY - minY)) * plotH;
+        parts.push(
+          `<g style="cursor:pointer;" data-fi="${i}">` +
+          `<rect x="${(x0 + slotW * 0.12).toFixed(1)}" y="${yO0.toFixed(1)}" width="${bw.toFixed(1)}" height="${(padT + plotH - yO0).toFixed(1)}" rx="3" fill="${regColor[f.reg]}" stroke="${isSel ? "#fbbf24" : "none"}" stroke-width="2"/>` +
+          `<rect x="${(x0 + slotW * 0.52).toFixed(1)}" y="${yOW.toFixed(1)}" width="${bw.toFixed(1)}" height="${(padT + plotH - yOW).toFixed(1)}" rx="3" fill="#fbbf24" opacity="0.85" stroke="${isSel ? "#ffffff" : "none"}" stroke-width="1.5"/>` +
+          `<text x="${(x0 + slotW / 2).toFixed(1)}" y="${padT + plotH + 17}" text-anchor="middle" fill="${isSel ? "#fbbf24" : textCol}" font-size="10.5" font-weight="700">${f.lbl}</text>` +
+          `<text x="${(x0 + slotW / 2).toFixed(1)}" y="${padT + plotH + 31}" text-anchor="middle" fill="${mutedCol}" font-size="9">${f.reg}</text>` +
+          `</g>`
+        );
+      } else {
+        const val = selectedCvOrder === "O0" ? f.o0 : f.ow5;
+        const bw = slotW * 0.66;
+        const bx = x0 + slotW * 0.17;
+        const by = padT + (1 - (val - minY) / (maxY - minY)) * plotH;
+        parts.push(
+          `<g style="cursor:pointer;" data-fi="${i}">` +
+          `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${(padT + plotH - by).toFixed(1)}" rx="4" fill="${regColor[f.reg]}" stroke="${isSel ? "#fbbf24" : "none"}" stroke-width="2.6"/>` +
+          `<text x="${(bx + bw / 2).toFixed(1)}" y="${(by - 5).toFixed(1)}" text-anchor="middle" fill="${textCol}" font-size="9.5" font-weight="700">${val.toFixed(1)}</text>` +
+          `<text x="${(bx + bw / 2).toFixed(1)}" y="${padT + plotH + 17}" text-anchor="middle" fill="${isSel ? "#fbbf24" : textCol}" font-size="10.5" font-weight="700">${f.lbl}</text>` +
+          `<text x="${(bx + bw / 2).toFixed(1)}" y="${padT + plotH + 31}" text-anchor="middle" fill="${mutedCol}" font-size="9">${f.reg}</text>` +
+          `</g>`
+        );
+      }
+    });
+
+    svg.innerHTML = parts.join("");
+    svg.querySelectorAll("g[data-fi]").forEach(function(g) {
+      g.addEventListener("click", function() {
+        selectedFoldIdx = parseInt(g.getAttribute("data-fi"), 10);
+        renderFolds();
+      });
+    });
+
+    const banner = document.getElementById("cvBannerStat");
+    if (selectedCvOrder === "OW5") {
+      banner.textContent = "OW5 (5 Shuffles): k05 = 81.35% | LOSO = 78.08% | XS4 = 84.62% | XS1 = 83.50%";
+    } else if (selectedCvOrder === "O0") {
+      banner.textContent = "O0 (Recorded Order): k05 = 82.66% | LOSO = 79.31% | XS4 = 86.01% | XS1 = 84.80%";
+    } else {
+      banner.textContent = "Overlay: Colored = O0 (82.66% k05) vs Amber = OW5 (81.35% k05, only -1.31 pp gap!)";
+    }
+
+    const cf = FOLDS_16[selectedFoldIdx];
+    document.getElementById("foldDetailStrip").innerHTML =
+      `<strong>Fold ${cf.idx} (${cf.lbl}, ${cf.reg}):</strong> O0 = <code>${cf.o0.toFixed(2)}%</code> | OW5 = <code>${cf.ow5.toFixed(2)}%</code> (shuffle delta <code>${(cf.ow5 - cf.o0).toFixed(2)} pp</code>). ${cf.info}`;
+  }
+
+  document.querySelectorAll("#cvOrderBtns .pill-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      document.querySelectorAll("#cvOrderBtns .pill-btn").forEach(function(b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      selectedCvOrder = btn.getAttribute("data-order");
+      renderFolds();
+    });
+  });
+
+  // =========================================================================
+  // 5. 11-LAYER OOP ARCHITECTURE & CLI QUICKSTART EXPLORER
+  // =========================================================================
+  const LAYERS = [
+    { rank: "L10", folder: "workflow/", root: "Workflow", sub: "stage_workflows/, cli_workflows/", cls: "DataDownloadStageWorkflow, FeatureExtractionStageWorkflow, FullModelTrainingStageWorkflow, SubmissionPackagingStageWorkflow, EvaluationVerificationStageWorkflow, EndToEndReproductionStageWorkflow, CommandLineInterfaceWorkflow", desc: "Top-level pipeline stages and the neurips-bci CLI entrypoint; saves resolved_run_configuration.json on every run.", rule: "Imports L0..L10; zero business math duplicated." },
+    { rank: "L9",  folder: "evaluator/", root: "Evaluator", sub: "metric_evaluators/, benchmark_evaluators/", cls: "CellBalancedAccuracyMetricEvaluator, CrossValidationBenchmarkEvaluator, ArchiveContractBenchmarkEvaluator", desc: "Competition cell-mean balanced accuracy, k05, 10-participant delete-1 jackknife SE, 1,024 sign-flip p-value, B=1 CV, and 6-gate archive survival verifier.", rule: "Imports L0..L9 only; never imported by Decoder or Organs." },
+    { rank: "L8",  folder: "decoder/", root: "Decoder", sub: "ensemble_decoders/", cls: "H10MultimodalEnsembleDecoder", desc: "Top-level causal B=1 streaming decoder orchestrating SessionPaceGate, ArtifactGuard, PseudoChrono EA, organs, Sinkhorn, G1 gate, and reset_state().", rule: "Imports L0..L8 only; implements Benchopt B=1 streaming contract." },
+    { rank: "L7",  folder: "organ/", root: "Organ", sub: "cnn_organs/, foundation_organs/, riemannian_organs/, multimodal_organs/", cls: "DualBlockCnnEnsembleCnnOrgan, QuadViewEegptFoundationOrgan, CodebrainLoraFoundationOrgan, CbramodReadoutFoundationOrgan, MirepnetSplineFoundationOrgan, SessionCspLdaRiemannianOrgan, ParticipantSpecialistRiemannianOrgan, SubwindowGeodesicRiemannianOrgan, RestSubspaceNuisanceRiemannianOrgan, AnchorSpecialistMultimodalOrgan, FisherAnchoredRidgeMultimodalOrgan", desc: "Modular decoding experts combining neural backbones, covariance operators, and session-local online adaptation.", rule: "Imports L0..L7 only; each organ owns isolated session state." },
+    { rank: "L6",  folder: "backbone/", root: "Backbone", sub: "convolutional_backbones/, foundation_backbones/", cls: "AdaptiveBatchNormConvolutionalBackbone, ShallowTemporalConvolutionalBackbone, FilterBankConvolutionalBackbone, GroupedEnsembleConvolutionalBackbone, BatchedEegptFoundationBackbone, CodebrainFoundationBackbone, CbramodFoundationBackbone, MirepnetFoundationBackbone, CudaGraphFoundationBackbone", desc: "Pure PyTorch neural network module definitions loaded strictly via weights_only=True or pure-NumPy float16 archives.", rule: "Imports L0..L6 only; zero pickle deserialization." },
+    { rank: "L5",  folder: "adaptation/", root: "Adapter", sub: "signal_adapters/, probability_adapters/, gate_adapters/", cls: "CausalArtifactSignalAdapter, PseudoChronoSignalAdapter, RunningPriorProbabilityAdapter, KalmanPriorProbabilityAdapter, PseudoChronoSinkhornProbabilityAdapter, SessionPaceGateAdapter, ExcessAgreementGateAdapter, AsymmetricConfidenceGateAdapter", desc: "Strictly causal (0..t) online adaptation state machines that reset cleanly at every session boundary.", rule: "Imports L0..L5 only; verified 0.0 future leakage." },
+    { rank: "L4",  folder: "acquisition/", root: "Acquirer", sub: "corpus_acquirers/, checkpoint_acquirers/, split_acquirers/", cls: "ProteusNemarCorpusAcquirer, DreyerZenodoCorpusAcquirer, CognitiveAuxiliaryCorpusAcquirer, HuggingFaceCheckpointAcquirer, ProteusFoldSplitAcquirer", desc: "Downloads public BIDS/MOABB/PhysioNet EEG corpora and HuggingFace pretrained checkpoints and extracts 41-ch 120 Hz windows and 16 CV folds.", rule: "Imports L0..L4 only; never imported by runtime submission.py." },
+    { rank: "L3",  folder: "container/", root: "Container", sub: "stream_containers/", cls: "WindowedCorpusStreamContainer, SessionWindowStreamContainer, ValidationFoldStreamContainer", desc: "Typed EEG corpus, single-session B=1 causal iterator, and 16-fold O0/W0..W4 validation split containers with allow_pickle=False persistence.", rule: "Imports L0..L3 only." },
+    { rank: "L2",  folder: "configuration/", root: "Configuration", sub: "section_configurations/, run_configurations/", cls: "ExperimentRunConfiguration, DatasetSectionConfiguration, CnnEnsembleSectionConfiguration, FoundationSectionConfiguration, ClassicalHeadsSectionConfiguration, FusionPaceSectionConfiguration", desc: "Sole JSON configuration file reader/writer in the entire codebase and deterministic BLAKE2b seed generator from master_random_seed.", rule: "Imports L0..L2 only; sole JSON config I/O boundary." },
+    { rank: "L1",  folder: "operator/", root: "Operator", sub: "matrix_operators/, signal_operators/", cls: "CovarianceMatrixOperator, SubspaceMatrixOperator, SpectralSignalOperator", desc: "Pure stateless linear algebra, Riemannian tangent-space, shrinkage covariance, filter-bank, and 3D spherical-spline operators.", rule: "Imports L0..L1 only; completely stateless." },
+    { rank: "L0",  folder: "validator/", root: "Validator", sub: "type_validators/", cls: "ParameterTypeValidator, ArchiveSafetyTypeValidator", desc: "Construction-time parameter type/range/shape validator and static AST + SHA-256 submission archive auditor.", rule: "Zero internal package dependencies (foundation layer)." }
+  ];
+
+  let selectedLayerIdx = 1;
+
+  function renderLayers() {
+    const grid = document.getElementById("layerGrid");
+    grid.innerHTML = LAYERS.map(function(ly, idx) {
+      return `<button type="button" class="layer-card ${idx === selectedLayerIdx ? "active" : ""}" data-ly="${idx}">` +
+        `<div class="layer-rank">${ly.rank} &bull; ${ly.root}</div>` +
+        `<div class="layer-title">${ly.folder}</div>` +
+        `<div style="font-size:0.78rem;color:var(--text-muted);">${ly.sub}</div>` +
+        `</button>`;
+    }).join("");
+
+    grid.querySelectorAll(".layer-card").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        selectedLayerIdx = parseInt(btn.getAttribute("data-ly"), 10);
+        renderLayers();
+      });
+    });
+
+    const cur = LAYERS[selectedLayerIdx];
+    document.getElementById("lyRank").textContent = `${cur.rank} • IMPORTS L0..${cur.rank} ONLY`;
+    document.getElementById("lyName").textContent = `${cur.folder} (Abstract Root: ${cur.root})`;
+    document.getElementById("lyDesc").textContent = cur.desc;
+    document.getElementById("lySubfams").textContent = cur.sub;
+    document.getElementById("lyClasses").textContent = cur.cls;
+    document.getElementById("lyRule").textContent = cur.rule;
+  }
+
+  const CLI_COMMANDS = [
+    "bash scripts/setup_conda_env.sh && conda activate neurips-bci",
+    "neurips-bci smoke-test --config configs/h10_smoke_test.json",
+    "neurips-bci download  --config configs/h10_r45_submission7.json",
+    "neurips-bci extract   --config configs/h10_r45_submission7.json",
+    "neurips-bci train     --config configs/h10_r45_submission7.json",
+    "neurips-bci package   --config configs/h10_r45_submission7.json",
+    "neurips-bci verify    --config configs/h10_r45_submission7.json",
+    "neurips-bci evaluate  --config configs/h10_r45_submission7.json",
+    "neurips-bci reproduce --config configs/h10_r45_submission7.json"
+  ];
+
+  document.getElementById("cmdList").innerHTML = CLI_COMMANDS.map(function(cmd, idx) {
+    return `<div class="cmd-item">` +
+      `<code class="cmd-code" id="cmd_${idx}">${cmd}</code>` +
+      `<button class="copy-btn" type="button" data-copy="${idx}">Copy</button>` +
+      `</div>`;
+  }).join("");
+
+  document.querySelectorAll(".copy-btn").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      const idx = btn.getAttribute("data-copy");
+      const txt = document.getElementById("cmd_" + idx).textContent;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt);
+      }
+      const prev = btn.textContent;
+      btn.textContent = "Copied!";
+      setTimeout(function() { btn.textContent = prev; }, 1200);
+    });
+  });
+
+  // Initial render
+  renderScalp();
+  renderFlow();
+  renderSimulator();
+  renderEvolution();
+  renderFolds();
+  renderLayers();
+})();
+</script>
+</body>
+</html>
